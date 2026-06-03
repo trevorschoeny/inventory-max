@@ -1,0 +1,70 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// Inventory Plus Plus (IPP) — the server-cooperative companion to IP (§0005).
+// Universal Fabric mod (environment "*"): the pocket graft runs on both sides
+// (the grafted slots must exist on the server to hold + persist content, and
+// on the client to render + interact). Depends on IP (composes its cycler /
+// HUD registry) and on MenuKit-Containers (the §0045 slot-graft kit). MenuKit
+// (the UI lib) arrives transitively via MKC's one-way `api` edge.
+//
+// Build: `./gradlew :inventory-plus-plus:build`. Loaded into the canonical
+// `:validator-mkc:runClient` via a modLocalRuntime line in validator-mkc.
+// ═══════════════════════════════════════════════════════════════════════════
+
+plugins {
+    id 'fabric-loom' version '1.14-SNAPSHOT'
+    id 'java'
+}
+
+version = property('mod_version')
+group   = property('maven_group')
+
+base.archivesName = 'inventory-plus-plus'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    maven { url 'https://maven.fabricmc.net/' }
+    maven { url 'https://maven.terraformersmc.com/releases/' }
+    maven { url 'https://maven.isxander.dev/releases/' }
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${property('minecraft_version')}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${property('loader_version')}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${property('fabric_version')}"
+
+    // ModMenu — surfaces IPP's config screen from the mods list. Soft dep.
+    modCompileOnly "com.terraformersmc:modmenu:17.0.0"
+    modLocalRuntime "com.terraformersmc:modmenu:17.0.0"
+
+    // YACL — config-screen framework, JIJ'd into IPP's jar (§0031, agency
+    // standard). modImplementation = compile + dev runtime; include = JIJ.
+    modImplementation "dev.isxander:yet-another-config-lib:3.8.1+1.21.11-fabric"
+    include          "dev.isxander:yet-another-config-lib:3.8.1+1.21.11-fabric"
+
+    // MenuKit-Containers — the §0045 slot-graft kit (MenuKitGraft, KeyedStorages,
+    // StorageAttachment, MKSlotState, MenuKitGraftRender, MenuKitSlot). MenuKit
+    // (the UI lib: HudRegion, MKHudPanel, Storage) comes transitively via MKC's
+    // one-way `api` edge — same path validator-mkc uses.
+    implementation project(path: ':menukit-containers', configuration: 'namedElements')
+
+    // Inventory Plus — IPP composes IP's public cycler + HUD registry
+    // (HotbarCyclableRegistry, CycleHudRegistry, CycleView, HudMode) and
+    // reads IPConfig for cohabitation flags. Dependency is one-way (IPP→IP).
+    implementation project(path: ':inventory-plus', configuration: 'namedElements')
+}
+
+loom {
+    runs {
+        client { ideConfigGenerated = false }
+        server { ideConfigGenerated = false }
+    }
+}
+
+jar {
+    from('LICENSE') { rename { "${it}_${project.name}" } }
+}

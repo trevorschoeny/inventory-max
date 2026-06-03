@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.trevorschoeny.inventoryplusplus.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "InventoryMenuPocketGraftMixin"
+  ],
+  "client": [
+    "client.PocketRenderMixin",
+    "client.PocketClickMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "inventoryplusplus",
+  "version": "1.0.0",
+  "name": "Inventory Plus Plus",
+  "description": "Server-cooperative companion to Inventory Plus (§0005). Adds Pocket Cycler — server-persistent pocket slots grafted onto the vanilla inventory via MenuKit's §0045 slot-graft kit. Purely additive over IP.",
+  "authors": ["trevorschoeny"],
+  "license": "MIT",
+  "environment": "*",
+  "mixins": [
+    "inventoryplusplus.mixins.json"
+  ],
+  "entrypoints": {
+    "main": ["com.trevorschoeny.inventoryplusplus.InventoryPlusPlus"],
+    "client": ["com.trevorschoeny.inventoryplusplus.InventoryPlusPlusClient"],
+    "modmenu": ["com.trevorschoeny.inventoryplusplus.config.IPPConfigModMenu"]
+  },
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21",
+    "menukit": ">=1.0.0",
+    "menukit-containers": "*",
+    "inventoryplus": ">=1.0.0"
+  }
+}
