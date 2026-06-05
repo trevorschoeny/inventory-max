@@ -3,6 +3,7 @@ package com.trevorschoeny.inventoryplusplus.mixin.client;
 import com.trevorschoeny.inventoryplusplus.config.IPPConfig;
 import com.trevorschoeny.inventoryplusplus.pocket.PocketHover;
 import com.trevorschoeny.inventoryplusplus.pocket.PocketPanelRender;
+import com.trevorschoeny.inventoryplusplus.pocket.PocketRow;
 import com.trevorschoeny.menukit.core.MenuKitGraftRender;
 import com.trevorschoeny.menukit.mixin.AbstractContainerScreenAccessor;
 
@@ -57,6 +58,11 @@ public abstract class PocketRenderMixin {
         AbstractContainerScreenAccessor acc = (AbstractContainerScreenAccessor) screen;
         int leftPos = acc.menuKit$getLeftPos();
         int topPos = acc.menuKit$getTopPos();
+
+        // §0047: move the revealed pockets into the centered horizontal row
+        // BEFORE the grafted slots draw (and before input hit-tests them, which
+        // happens on later click frames). Render + clicks both read graftX/Y.
+        PocketRow.reposition(screen.getMenu());
 
         PocketPanelRender.drawBackground(g, leftPos, topPos);
         MenuKitGraftRender.renderGraftedSlots(screen, g, mouseX, mouseY);

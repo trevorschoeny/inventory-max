@@ -85,8 +85,42 @@ public final class Pockets {
     /**
      * Screen-relative y of a pocket at {@code depth} (0 = closest to the
      * hotbar). Pockets stack upward from just above the hotbar.
+     *
+     * <p>This is the original <b>vertical</b> column layout — now used only as
+     * the graft's construction seed. At runtime the revealed pockets are moved
+     * into the floating horizontal row below ({@link #pocketRowX} /
+     * {@link #pocketRowY}) via §0047 {@code setGraftPosition}.
      */
     public static int pocketY(int depth) {
         return HOTBAR_Y - HOTBAR_GAP - (depth + 1) * SLOT;
+    }
+
+    // ─── Floating horizontal row (§0047 runtime layout) ──────────────────
+    //
+    // Trev 2026-06-05: in-inventory pockets float as a single horizontal row
+    // centered over the hovered hotbar slot (matching the in-world HUD cross,
+    // where the Pocket arm is horizontal). The row re-centers as the count
+    // changes — 1 sits dead-center, 2 straddles the center, 3 spans one slot to
+    // each side. MenuKit ships the reposition primitive; the centering math is
+    // ours (same library/consumer split as the hover-reveal sustain zone).
+
+    /**
+     * Screen-relative x of the pocket at {@code depth} (0 = leftmost) when the
+     * revealed pockets float as one horizontal row of {@code count} slots,
+     * centered over hotbar slot {@code hotbar}. {@code SLOT/2 - count*SLOT/2}
+     * shifts the row left so its center sits over the hotbar slot's center;
+     * {@code depth*SLOT} steps right across the row.
+     */
+    public static int pocketRowX(int hotbar, int count, int depth) {
+        return pocketX(hotbar) + SLOT / 2 - (count * SLOT) / 2 + depth * SLOT;
+    }
+
+    /**
+     * Screen-relative y of the floating horizontal pocket row — one slot-height
+     * above the hotbar slot, leaving {@link #HOTBAR_GAP} between the row's
+     * bottom edge and the hotbar slot's top.
+     */
+    public static int pocketRowY() {
+        return HOTBAR_Y - HOTBAR_GAP - SLOT;
     }
 }

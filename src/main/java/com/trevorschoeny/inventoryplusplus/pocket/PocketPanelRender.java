@@ -32,19 +32,23 @@ public final class PocketPanelRender {
     private static final int GLYPH = 0xFF202020;
     private static final int GLYPH_DISABLED = 0xFF5A5A5A;
 
-    /** Raised pockets-panel backing — drawn BEFORE the grafted slot frames. */
+    /**
+     * Raised pockets-panel backing — drawn BEFORE the grafted slot frames. Spans
+     * the floating horizontal row (centered over the hovered hotbar slot), so it
+     * widens as pockets are added and stays centered.
+     */
     public static void drawBackground(GuiGraphics g, int leftPos, int topPos) {
         int rev = PocketHoverState.revealedHotbar();
         if (rev < 0) return;
         int c = PocketState.count(rev);
         if (c <= 0) return; // nothing above when no pockets
 
-        int sx = leftPos + Pockets.pocketX(rev);
-        int top = topPos + Pockets.pocketY(c - 1);
-        int bot = topPos + Pockets.pocketY(0) + 18;
+        int left = leftPos + Pockets.pocketRowX(rev, c, 0);
+        int right = leftPos + Pockets.pocketRowX(rev, c, c - 1) + Pockets.SLOT;
+        int top = topPos + Pockets.pocketRowY();
         PanelRendering.renderPanel(g,
-                sx - POCKET_PANEL_PAD, top - POCKET_PANEL_PAD,
-                18 + 2 * POCKET_PANEL_PAD, (bot - top) + 2 * POCKET_PANEL_PAD,
+                left - POCKET_PANEL_PAD, top - POCKET_PANEL_PAD,
+                (right - left) + 2 * POCKET_PANEL_PAD, Pockets.SLOT + 2 * POCKET_PANEL_PAD,
                 PanelStyle.RAISED);
     }
 

@@ -42,13 +42,14 @@ public final class PocketHover {
         }
         PocketHoverState.setRevealedHotbar(newReveal);
 
-        // Hovered pocket depth within the revealed column (for future use).
+        // Hovered pocket depth within the revealed row (for future use).
         int hoveredDepth = -1;
         if (newReveal >= 0) {
             int c = PocketState.count(newReveal);
             for (int d = 0; d < c; d++) {
                 if (inBox(mouseX, mouseY,
-                        leftPos + Pockets.pocketX(newReveal), topPos + Pockets.pocketY(d), 16, 16)) {
+                        leftPos + Pockets.pocketRowX(newReveal, c, d),
+                        topPos + Pockets.pocketRowY(), 16, 16)) {
                     hoveredDepth = d;
                     break;
                 }
@@ -76,16 +77,27 @@ public final class PocketHover {
     }
 
     /**
-     * The zone that keeps a revealed column open: from the top of its pockets
-     * (or the hotbar slot top, if 0 pockets) down through the +/− panel below.
+     * The zone that keeps a revealed column open: spans the floating horizontal
+     * pocket row (above), the hotbar slot, and the +/− panel (below), so the
+     * cursor can travel the whole stack without it collapsing. Horizontal extent
+     * follows the row's width (it widens with the pocket count); at 0 pockets it
+     * falls back to the hotbar slot column so the +/− reveal still sustains.
      */
     private static boolean inSustainZone(int leftPos, int topPos, double mx, double my, int hotbar) {
         int c = PocketState.count(hotbar);
-        int zx = leftPos + Pockets.pocketX(hotbar) - 2;
-        int zw = 16 + 4;
-        int ztop = topPos + (c > 0 ? Pockets.pocketY(c - 1) : Pockets.HOTBAR_Y) - 2;
-        int zbot = PocketButtons.panelTop(topPos) + PocketButtons.panelHeight() + 2;
-        return inBox(mx, my, zx, ztop, zw, zbot - ztop);
+        int pad = 2;
+        int zleft, zright, ztop;
+        if (c > 0) {
+            zleft = leftPos + Pockets.pocketRowX(hotbar, c, 0) - pad;
+            zright = leftPos + Pockets.pocketRowX(hotbar, c, c - 1) + Pockets.SLOT + pad;
+            ztop = topPos + Pockets.pocketRowY() - pad;
+        } else {
+            zleft = leftPos + Pockets.pocketX(hotbar) - pad;
+            zright = leftPos + Pockets.pocketX(hotbar) + Pockets.SLOT + pad;
+            ztop = topPos + Pockets.HOTBAR_Y - pad;
+        }
+        int zbot = PocketButtons.panelTop(topPos) + PocketButtons.panelHeight() + pad;
+        return inBox(mx, my, zleft, ztop, zright - zleft, zbot - ztop);
     }
 
     private static boolean inBox(double mx, double my, int x, int y, int w, int h) {
