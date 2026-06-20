@@ -13,9 +13,10 @@
 plugins {
     id 'fabric-loom' version '1.14-SNAPSHOT'
     id 'java'
+    id 'com.modrinth.minotaur' version '2.+'
 }
 
-version = property('mod_version')
+version = property('inventorymax_version')
 group   = property('maven_group')
 
 base.archivesName = 'inventory-max'
@@ -67,4 +68,24 @@ loom {
 
 jar {
     from('LICENSE') { rename { "${it}_${project.name}" } }
+}
+
+// ── Modrinth Publishing ────────────────────────────────────────────────
+// Inventory Max — Modrinth project id ETvEZKh9 (slug inventory-max).
+// Lead @ Trevlar Mods owns the publish (§0032).
+modrinth {
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "ETvEZKh9"
+    versionNumber = property('inventorymax_version')
+    versionName = "Inventory Max ${property('inventorymax_version')}"
+    versionType = "release"
+    uploadFile = remapJar
+    gameVersions = [property('minecraft_version')]
+    loaders = ["fabric"]
+    dependencies {
+        required.project "fabric-api"
+        required.project "menukit"
+        required.project "menukit-containers"
+        required.project "inventory-plus"
+    }
 }
