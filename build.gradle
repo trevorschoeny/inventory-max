@@ -6,7 +6,7 @@
 // HUD registry) and on MenuKit-Containers (the §0045 slot-graft kit). MenuKit
 // (the UI lib) arrives transitively via MKC's one-way `api` edge.
 //
-// Build: `./gradlew :inventory-plus-plus:build`. Loaded into the canonical
+// Build: `./gradlew :inventory-max:build`. Loaded into the canonical
 // `:validator-mkc:runClient` via a modLocalRuntime line in validator-mkc.
 // ═══════════════════════════════════════════════════════════════════════════
 
