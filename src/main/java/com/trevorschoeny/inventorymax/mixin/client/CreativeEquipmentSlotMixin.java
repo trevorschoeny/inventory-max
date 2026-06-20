@@ -19,18 +19,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 /**
- * Makes the equipment slots show + work in the creative inventory tab using the
- * same underlying slots/storage/behaviors as survival (Trev, 2026-06-17).
+ * Positions + frames the equipment slots in the creative inventory tab. Purely
+ * visual — the library owns creative slot sync (§0051): MenuKit-Containers'
+ * creative-set-slot bridge routes a creative placement into a grafted slot's
+ * real storage, so the elytra/totem slot behaves identically in creative and
+ * survival with no consumer creative-sync. This mixin only fixes how they look.
  *
  * <p>How it works: the creative inventory tab iterates EVERY slot on the player's
  * {@code inventoryMenu} — including our two grafts — and wraps each in a
  * {@code SlotWrapper} positioned by index. Our grafts have no index-position
- * mapping, so they fall into the default branch and overlay the hotbar. Because
- * the wrapper delegates everything (item, mayPlace, click) to our real
- * {@link MenuKitSlot}, and creative routes inventory-tab clicks back through
- * {@code inventoryMenu.clicked(...)}, the slots already <em>function</em> in
- * creative for free — they're just in the wrong place and frameless. This mixin
- * fixes both:
+ * mapping, so they fall into the default branch and overlay the hotbar. The
+ * wrapper delegates everything (item, mayPlace, click) to our real
+ * {@link MenuKitSlot}, so they function once the library bridges the write —
+ * they're just in the wrong place and frameless. This mixin fixes both:
  *
  * <ul>
  *   <li><b>Position</b> — {@code SlotWrapper.x/y} are {@code final}, so we

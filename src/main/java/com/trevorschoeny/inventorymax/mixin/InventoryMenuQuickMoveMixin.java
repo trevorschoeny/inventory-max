@@ -17,10 +17,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /**
  * Shift-click (quick-move) routing for the equipment slots — the consumer work
  * the graft kit leaves to us (MenuKit's {@code quickMoveStack} knows nothing of
- * grafted slots). Universal: this runs server-side for the authoritative move
- * and client-side for prediction; it also covers <b>creative</b>, where the
- * inventory tab funnels shift-clicks through {@code inventoryMenu.clicked(...)}
- * → {@code quickMoveStack} just like survival.
+ * grafted slots). Runs server-side for the authoritative move and client-side
+ * for prediction. Creative slot sync is the library's job (§0051) — its
+ * creative-set-slot bridge routes placements into grafted slots — so this mixin
+ * does not special-case creative.
  *
  * <p>Rules (Trev, 2026-06-17), all gated on the equipment slots being present:
  * <ul>
