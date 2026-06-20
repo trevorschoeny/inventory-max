@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.trevorschoeny.inventorymax.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "AbstractContainerMenuMoveInvoker",
+    "ContainerLockClickCaptureMixin",
+    "ContainerLockEnforcementMixin",
+    "ContainerLockPickAllMixin",
+    "DispenserLockEnforcementMixin",
+    "EquipmentGlideMixin",
+    "HopperLockEnforcementMixin",
+    "InventoryMenuEquipmentGraftMixin",
+    "InventoryMenuPocketGraftMixin",
+    "InventoryMenuQuickMoveMixin"
+  ],
+  "client": [
+    "client.CreativeEquipmentSlotMixin",
+    "client.EquipElytraExtractMixin",
+    "client.EquipElytraRenderStateMixin",
+    "client.EquipElytraWingsMixin",
+    "client.PocketClickMixin",
+    "client.PocketRenderMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

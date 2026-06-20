@@ -1,19 +1,19 @@
 {
   "schemaVersion": 1,
-  "id": "inventoryplusplus",
+  "id": "inventorymax",
   "version": "1.0.0",
-  "name": "Inventory Plus Plus",
+  "name": "Inventory Max",
   "description": "Server-cooperative companion to Inventory Plus (§0005). Adds Pocket Cycler — server-persistent pocket slots grafted onto the vanilla inventory via MenuKit's §0045 slot-graft kit. Purely additive over IP.",
   "authors": ["trevorschoeny"],
   "license": "MIT",
   "environment": "*",
   "mixins": [
-    "inventoryplusplus.mixins.json"
+    "inventorymax.mixins.json"
   ],
   "entrypoints": {
-    "main": ["com.trevorschoeny.inventoryplusplus.InventoryPlusPlus"],
-    "client": ["com.trevorschoeny.inventoryplusplus.InventoryPlusPlusClient"],
-    "modmenu": ["com.trevorschoeny.inventoryplusplus.config.IPPConfigModMenu"]
+    "main": ["com.trevorschoeny.inventorymax.InventoryMax"],
+    "client": ["com.trevorschoeny.inventorymax.InventoryMaxClient"],
+    "modmenu": ["com.trevorschoeny.inventorymax.config.IMConfigModMenu"]
   },
   "depends": {
     "fabricloader": ">=0.15.0",

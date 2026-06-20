@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-// Inventory Plus Plus (IPP) — the server-cooperative companion to IP (§0005).
+// Inventory Max (IM) — the server-cooperative companion to IP (§0005).
 // Universal Fabric mod (environment "*"): the pocket graft runs on both sides
 // (the grafted slots must exist on the server to hold + persist content, and
 // on the client to render + interact). Depends on IP (composes its cycler /
@@ -18,7 +18,7 @@ plugins {
 version = property('mod_version')
 group   = property('maven_group')
 
-base.archivesName = 'inventory-plus-plus'
+base.archivesName = 'inventory-max'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -37,11 +37,11 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${property('loader_version')}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${property('fabric_version')}"
 
-    // ModMenu — surfaces IPP's config screen from the mods list. Soft dep.
+    // ModMenu — surfaces IM's config screen from the mods list. Soft dep.
     modCompileOnly "com.terraformersmc:modmenu:17.0.0"
     modLocalRuntime "com.terraformersmc:modmenu:17.0.0"
 
-    // YACL — config-screen framework, JIJ'd into IPP's jar (§0031, agency
+    // YACL — config-screen framework, JIJ'd into IM's jar (§0031, agency
     // standard). modImplementation = compile + dev runtime; include = JIJ.
     modImplementation "dev.isxander:yet-another-config-lib:3.8.1+1.21.11-fabric"
     include          "dev.isxander:yet-another-config-lib:3.8.1+1.21.11-fabric"
@@ -52,9 +52,9 @@ dependencies {
     // one-way `api` edge — same path validator-mkc uses.
     implementation project(path: ':menukit-containers', configuration: 'namedElements')
 
-    // Inventory Plus — IPP composes IP's public cycler + HUD registry
+    // Inventory Plus — IM composes IP's public cycler + HUD registry
     // (HotbarCyclableRegistry, CycleHudRegistry, CycleView, HudMode) and
-    // reads IPConfig for cohabitation flags. Dependency is one-way (IPP→IP).
+    // reads IPConfig for cohabitation flags. Dependency is one-way (IM→IP).
     implementation project(path: ':inventory-plus', configuration: 'namedElements')
 }
 

@@ -1,0 +1,102 @@
+package com.trevorschoeny.inventorymax.config;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+
+import com.trevorschoeny.inventorymax.InventoryMax;
+import com.trevorschoeny.inventoryplus.columncycler.hud.HudMode;
+
+import net.fabricmc.loader.api.FabricLoader;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+/**
+ * Global IM config — feature toggles for Pocket Cycler. Mirrors IP's
+ * {@code IPConfig} static-field + JSON pattern. Persisted to
+ * {@code config/inventorymax/config.json}.
+ *
+ * <p>IM owns its own config file + ModMenu entry rather than extending IP's
+ * (dependency direction is IM→IP; IM storing state in IP's file would invert
+ * ownership). Reuses IP's {@link HudMode} enum for the shared cycle HUD.
+ *
+ * <p>Per-world pocket counts are NOT here — those live per-world in
+ * {@code PocketState} (different layouts per world, same as Column Cycler's
+ * slot membership).
+ */
+public final class IMConfig {
+
+    private IMConfig() {}
+
+    private static final int CURRENT_VERSION = 1;
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
+    // Pocket Cycler master toggle. Default ON — installing IM is itself the
+    // opt-in; pockets are a manual feature (not automation), so the
+    // conservative-automation-default rule doesn't apply.
+    private static boolean pocketCyclerEnabled = true;
+    // Shared cycle HUD mode for pockets (None / Mini-hotbar). Default
+    // MINI_HOTBAR, matching Column Cycler.
+    private static HudMode pocketHudMode = HudMode.MINI_HOTBAR;
+
+    private static boolean loaded = false;
+
+    private static Path filePath() {
+        return FabricLoader.getInstance().getConfigDir()
+                .resolve("inventorymax")
+                .resolve("config.json");
+    }
+
+    public static void load() {
+        if (loaded) return;
+        loaded = true;
+        Path path = filePath();
+        if (!Files.exists(path)) {
+            InventoryMax.LOGGER.info("[config] no config at {} — using defaults", path);
+            return;
+        }
+        try {
+            String json = Files.readString(path);
+            JsonObject root = JsonParser.parseString(json).getAsJsonObject();
+            pocketCyclerEnabled = readBool(root, "pocketCyclerEnabled", pocketCyclerEnabled);
+            pocketHudMode = HudMode.fromName(readString(root, "pocketHudMode", null), pocketHudMode);
+            InventoryMax.LOGGER.info("[config] loaded from {}", path);
+        } catch (IOException | JsonSyntaxException | IllegalStateException e) {
+            InventoryMax.LOGGER.error("[config] failed to read {} — using defaults", path, e);
+        }
+    }
+
+    private static boolean readBool(JsonObject root, String key, boolean fallback) {
+        return root.has(key) && root.get(key).isJsonPrimitive()
+                ? root.get(key).getAsBoolean() : fallback;
+    }
+
+    private static String readString(JsonObject root, String key, String fallback) {
+        return root.has(key) && root.get(key).isJsonPrimitive()
+                ? root.get(key).getAsString() : fallback;
+    }
+
+    private static void save() {
+        Path path = filePath();
+        try {
+            Files.createDirectories(path.getParent());
+            JsonObject root = new JsonObject();
+            root.addProperty("version", CURRENT_VERSION);
+            root.addProperty("pocketCyclerEnabled", pocketCyclerEnabled);
+            root.addProperty("pocketHudMode", pocketHudMode.name());
+            Files.writeString(path, GSON.toJson(root));
+        } catch (IOException e) {
+            InventoryMax.LOGGER.error("[config] failed to write {} — changes won't persist", path, e);
+        }
+    }
+
+    public static boolean pocketCyclerEnabled() { return pocketCyclerEnabled; }
+    public static void setPocketCyclerEnabled(boolean v) { pocketCyclerEnabled = v; save(); }
+
+    public static HudMode pocketHudMode() { return pocketHudMode; }
+    public static void setPocketHudMode(HudMode v) { pocketHudMode = v; save(); }
+}
