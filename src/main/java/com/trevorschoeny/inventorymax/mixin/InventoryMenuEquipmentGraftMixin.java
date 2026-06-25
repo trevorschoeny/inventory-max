@@ -53,6 +53,10 @@ public abstract class InventoryMenuEquipmentGraftMixin {
                 .policy(InteractionPolicy.input(EquipmentSlots::isElytra)
                         .withMaxStackSize(stack -> 1))
                 .layout(EquipmentSlots.SLOT_X, EquipmentSlots.ELYTRA_Y, 1)
+                // Curse of Binding: a cursed elytra can't be removed while alive
+                // (survival only; creative + death are handled by the library /
+                // §0052). The §0053 MKC primitive — equipment-semantic opt-in.
+                .bindsCursedItems()
                 .graft();
 
         // Totem slot (bottom, just above the offhand) — accepts only totems, one item.
@@ -63,6 +67,9 @@ public abstract class InventoryMenuEquipmentGraftMixin {
                 .policy(InteractionPolicy.input(EquipmentSlots::isTotem)
                         .withMaxStackSize(stack -> 1))
                 .layout(EquipmentSlots.SLOT_X, EquipmentSlots.TOTEM_Y, 1)
+                // Curse of Binding: a cursed totem (uncommon, but possible via
+                // the component) is likewise bound to its slot while alive.
+                .bindsCursedItems()
                 .graft();
     }
 }
