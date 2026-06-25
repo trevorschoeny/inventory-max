@@ -57,15 +57,11 @@ public abstract class InventoryMenuQuickMoveMixin {
 
         // ── OUT of an equipment slot → main + hotbar (skip armor/offhand) ──
         if (index == elytraIdx || index == totemIdx) {
-            // Respect the slot's removal policy — Curse of Binding (and any
-            // future canRemove rule) blocks taking the item out while alive,
-            // the same gate a direct click hits via mayPickup. This custom
-            // router bypasses vanilla's quick-move, so without this check it
-            // would be a hole in the library's binding enforcement.
-            if (!from.mayPickup(player)) {
-                cir.setReturnValue(ItemStack.EMPTY);
-                return;
-            }
+            // No binding check needed here: vanilla's doClick pre-checks
+            // slot.mayPickup before it ever calls quickMoveStack, and the §0053
+            // MKC primitive (bindsCursedItems) makes mayPickup false for a bound
+            // item — so a bound item's shift-click never reaches this router.
+            // Curse of Binding is fully library-enforced on every removal path.
             cir.setReturnValue(inventoryMax$moveAndFinish(player, from, live, 9, 45, false));
             return;
         }
