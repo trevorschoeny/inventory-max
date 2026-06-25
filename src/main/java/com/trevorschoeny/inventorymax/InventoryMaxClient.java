@@ -4,6 +4,7 @@ import com.trevorschoeny.inventoryplus.lockedslots.LockedSlots;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.config.IMKeybinds;
 import com.trevorschoeny.inventorymax.containerlocks.ContainerLockProvider;
+import com.trevorschoeny.inventorymax.equipment.EquipHud;
 import com.trevorschoeny.inventorymax.pocket.PocketCyclerHudSource;
 import com.trevorschoeny.inventorymax.pocket.PocketInput;
 import com.trevorschoeny.inventorymax.pocket.PocketState;
@@ -30,6 +31,8 @@ public class InventoryMaxClient implements ClientModInitializer {
         // Contribute pockets to IP's shared cycle HUD (the generalization
         // paying off — one HUD, both cyclers).
         PocketCyclerHudSource.register();
+        // Equipment-slot HUD cue — elytra + totem icons to the left of the hotbar.
+        EquipHud.register();
 
         // Plug Container Locks into IP's client-side lock seam, so IP's unified
         // lock-check / edit UI / icon / sort+move-matching skip recognize placed
