@@ -1,5 +1,7 @@
 package com.trevorschoeny.inventorymax.pocket;
 
+import net.minecraft.world.inventory.AbstractContainerMenu;
+
 /**
  * Geometry for the +/− resize buttons, which live in their own small panel
  * <b>just below</b> the hotbar slot (separate from the pockets panel above).
@@ -16,9 +18,9 @@ public final class PocketButtons {
     /** Button size (px). */
     public static final int SIZE = 7;
 
-    /** Top of the +/− panel, just below the hotbar slot. */
-    public static int panelTop(int topPos) {
-        return topPos + Pockets.HOTBAR_Y + Pockets.SLOT;
+    /** Top of the +/− panel, just below the hotbar slot (menu-derived hotbar y). */
+    public static int panelTop(AbstractContainerMenu menu, int topPos) {
+        return topPos + Pockets.hotbarItemY(menu) + Pockets.SLOT;
     }
 
     /** Height of the +/− panel. */
@@ -26,20 +28,20 @@ public final class PocketButtons {
         return SIZE + 4;
     }
 
-    private static int rowY(int topPos) {
-        return panelTop(topPos) + 2;
+    private static int rowY(AbstractContainerMenu menu, int topPos) {
+        return panelTop(menu, topPos) + 2;
     }
 
     /** {x, y, w, h} of the − button. */
-    public static int[] minusRect(int leftPos, int topPos, int hotbar) {
-        int x = leftPos + Pockets.pocketX(hotbar) + 1;
-        return new int[] { x, rowY(topPos), SIZE, SIZE };
+    public static int[] minusRect(AbstractContainerMenu menu, int leftPos, int topPos, int hotbar) {
+        int x = leftPos + Pockets.hotbarFrameX(menu, hotbar) + 1;
+        return new int[] { x, rowY(menu, topPos), SIZE, SIZE };
     }
 
     /** {x, y, w, h} of the + button. */
-    public static int[] plusRect(int leftPos, int topPos, int hotbar) {
-        int x = leftPos + Pockets.pocketX(hotbar) + 1 + SIZE + 1;
-        return new int[] { x, rowY(topPos), SIZE, SIZE };
+    public static int[] plusRect(AbstractContainerMenu menu, int leftPos, int topPos, int hotbar) {
+        int x = leftPos + Pockets.hotbarFrameX(menu, hotbar) + 1 + SIZE + 1;
+        return new int[] { x, rowY(menu, topPos), SIZE, SIZE };
     }
 
     public static boolean inRect(double mx, double my, int[] r) {

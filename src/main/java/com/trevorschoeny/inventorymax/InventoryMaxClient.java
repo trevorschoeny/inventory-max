@@ -7,9 +7,11 @@ import com.trevorschoeny.inventorymax.config.IMKeybinds;
 import com.trevorschoeny.inventorymax.containerlocks.ContainerLockProvider;
 import com.trevorschoeny.inventorymax.equipment.EquipAutoRestock;
 import com.trevorschoeny.inventorymax.equipment.EquipHud;
+import com.trevorschoeny.inventorymax.equipment.EquipScreenPresence;
 import com.trevorschoeny.inventorymax.pocket.PocketCyclable;
 import com.trevorschoeny.inventorymax.pocket.PocketCyclerHudSource;
 import com.trevorschoeny.inventorymax.pocket.PocketInput;
+import com.trevorschoeny.inventorymax.pocket.PocketScreenPresence;
 import com.trevorschoeny.inventorymax.pocket.PocketState;
 
 import net.fabricmc.api.ClientModInitializer;
@@ -20,9 +22,12 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
  * surface: config, keybinds, per-world count state, input dispatch, and the
  * pocket source for IP's shared cycle HUD.
  *
- * <p>The graft + render + click mixins activate via {@code mixins.json}; the
- * shared HUD panel itself is registered by IP (this just contributes a
- * source into IP's {@code CycleHudRegistry}).
+ * <p>The graft mixins (slot construction) activate via {@code mixins.json}; the
+ * grafted slots' on-screen presence — render, hover, click, reveal across
+ * survival <em>and</em> creative — is the library's, wired through the
+ * {@code GraftScreenPresence}s registered below. The shared HUD panel itself is
+ * registered by IP (this just contributes a source into IP's
+ * {@code CycleHudRegistry}).
  */
 public class InventoryMaxClient implements ClientModInitializer {
 
@@ -41,6 +46,12 @@ public class InventoryMaxClient implements ClientModInitializer {
         HotbarCyclableRegistry.register(PocketCyclable.INSTANCE);
         // Equipment-slot HUD cue — elytra + totem icons to the left of the hotbar.
         EquipHud.register();
+        // Screen presence: the library draws + hover/click-routes + reveals the
+        // grafted pocket + equipment slots on every inventory-bearing screen
+        // (creative included) via MenuKit's graft dispatch. Replaces the old
+        // per-screen render/click mixins; we register the grafts' presences here.
+        PocketScreenPresence.register();
+        EquipScreenPresence.register();
         // Auto-restock the totem slot from inventory after a death save (composes
         // IP's auto-restock search; follows the auto-restock toggle).
         ClientTickEvents.END_CLIENT_TICK.register(EquipAutoRestock::tick);

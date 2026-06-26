@@ -69,23 +69,11 @@ public final class EquipmentSlots {
     /** Totem slot frame y (bottom — directly above the offhand frame at 61). */
     public static final int TOTEM_Y = 43;
 
-    // ─── Creative inventory-tab layout (item positions, screen-relative) ──
-    //
-    // The creative inventory tab wraps every player-inventoryMenu slot in a
-    // SlotWrapper and lays them out by index; our grafts fall into the default
-    // (hotbar) branch and overlay it. We re-place them to the right of the
-    // leggings/boots armor column. Vanilla armor there sits at ITEM positions
-    // helmet(54,6) chestplate(54,33) leggings(108,6) boots(108,33); so "right of
-    // leggings/boots" is x = 108 + 18 = 126 then 144, vertically centered against
-    // the two rows (y 6..33) ≈ 20. These are item positions (frame is item − 1).
-    // Pixel-tunable.
-
-    /** Creative: elytra slot item x (left of the horizontal pair). */
-    public static final int CREATIVE_ELYTRA_X = 127;
-    /** Creative: totem slot item x (right of the pair). */
-    public static final int CREATIVE_TOTEM_X = 145;
-    /** Creative: both equip slots' item y (centered against leggings/boots). */
-    public static final int CREATIVE_Y = 20;
+    // No creative-specific coordinates: EquipScreenPresence anchors both slots to
+    // the real offhand via MenuKit's VanillaSlotResolver, which resolves the
+    // offhand's live position on the survival inventory AND the creative tab. The
+    // SLOT_X/ELYTRA_Y/TOTEM_Y above remain only as the graft's construction seed
+    // (InventoryMenuEquipmentGraftMixin); the per-frame position is resolved.
 
     /**
      * Player-attached equipment content — 2 slots, survives logout/restart

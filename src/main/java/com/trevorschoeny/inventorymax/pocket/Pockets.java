@@ -1,9 +1,12 @@
 package com.trevorschoeny.inventorymax.pocket;
 
 import com.trevorschoeny.menukit.core.StorageAttachment;
+import com.trevorschoeny.menukit.inject.VanillaSlotResolver;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -77,6 +80,12 @@ public final class Pockets {
         return "pocket_" + hotbar + "_" + depth;
     }
 
+    /** True for any pocket graft's group id (see {@link #groupId}) — used to ask
+     *  "does this screen's live menu actually carry our pockets?". */
+    public static boolean isPocketGroup(String groupId) {
+        return groupId.startsWith("pocket_");
+    }
+
     /** Screen-relative x of the pocket column for a hotbar slot. */
     public static int pocketX(int hotbar) {
         return HOTBAR0_X + hotbar * SLOT;
@@ -111,8 +120,8 @@ public final class Pockets {
      * shifts the row left so its center sits over the hotbar slot's center;
      * {@code depth*SLOT} steps right across the row.
      */
-    public static int pocketRowX(int hotbar, int count, int depth) {
-        return pocketX(hotbar) + SLOT / 2 - (count * SLOT) / 2 + depth * SLOT;
+    public static int pocketRowX(AbstractContainerMenu menu, int hotbar, int count, int depth) {
+        return hotbarFrameX(menu, hotbar) + SLOT / 2 - (count * SLOT) / 2 + depth * SLOT;
     }
 
     /**
@@ -120,7 +129,40 @@ public final class Pockets {
      * above the hotbar slot, leaving {@link #HOTBAR_GAP} between the row's
      * bottom edge and the hotbar slot's top.
      */
-    public static int pocketRowY() {
-        return HOTBAR_Y - HOTBAR_GAP - SLOT;
+    public static int pocketRowY(AbstractContainerMenu menu) {
+        return hotbarItemY(menu) - HOTBAR_GAP - SLOT;
+    }
+
+    // ─── Creative-aware hotbar origin (derive from the menu's own hotbar slots) ──
+    //
+    // The constants above (HOTBAR0_X / HOTBAR_Y) encode the SURVIVAL inventory
+    // layout. The graft screen dispatch now draws pockets on creative too, where
+    // the hotbar sits elsewhere — so the render/hover/button geometry reads the
+    // actual hotbar slot positions off the menu instead of the constants. Works on
+    // any screen that surfaces the player inventory (survival, creative tab);
+    // falls back to the survival constants when a hotbar slot can't be found.
+
+    /** Frame x of hotbar column {@code n} on this menu (item x − 1), or the survival fallback. */
+    public static int hotbarFrameX(AbstractContainerMenu menu, int n) {
+        Slot s = hotbarSlot(menu, n);
+        return s != null ? s.x - 1 : HOTBAR0_X + n * SLOT;
+    }
+
+    /** Item y of the hotbar row on this menu, or the survival fallback. */
+    public static int hotbarItemY(AbstractContainerMenu menu) {
+        Slot s = hotbarSlot(menu, 0);
+        return s != null ? s.y : HOTBAR_Y;
+    }
+
+    /**
+     * The player's hotbar {@link Slot} for inventory index {@code n} (0–8) on this
+     * menu, or null. Delegates to MenuKit's {@link VanillaSlotResolver}, which owns
+     * the slot loop AND the creative {@code SlotWrapper} unwrap — the creative
+     * wrapper reports its <em>own</em> index from {@code getContainerSlot()}, not
+     * the target's, so resolving by container identity only works through that
+     * unwrap. The position then adapts to whatever screen the dispatch fired on.
+     */
+    private static Slot hotbarSlot(AbstractContainerMenu menu, int n) {
+        return VanillaSlotResolver.resolveSlot(menu, n).orElse(null);
     }
 }

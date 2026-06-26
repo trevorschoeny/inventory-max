@@ -4,6 +4,7 @@ import com.trevorschoeny.menukit.core.PanelRendering;
 import com.trevorschoeny.menukit.core.PanelStyle;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 /**
  * Draws the pocket UI (client):
@@ -37,15 +38,15 @@ public final class PocketPanelRender {
      * the floating horizontal row (centered over the hovered hotbar slot), so it
      * widens as pockets are added and stays centered.
      */
-    public static void drawBackground(GuiGraphics g, int leftPos, int topPos) {
+    public static void drawBackground(GuiGraphics g, AbstractContainerMenu menu, int leftPos, int topPos) {
         int rev = PocketHoverState.revealedHotbar();
         if (rev < 0) return;
         int c = PocketState.count(rev);
         if (c <= 0) return; // nothing above when no pockets
 
-        int left = leftPos + Pockets.pocketRowX(rev, c, 0);
-        int right = leftPos + Pockets.pocketRowX(rev, c, c - 1) + Pockets.SLOT;
-        int top = topPos + Pockets.pocketRowY();
+        int left = leftPos + Pockets.pocketRowX(menu, rev, c, 0);
+        int right = leftPos + Pockets.pocketRowX(menu, rev, c, c - 1) + Pockets.SLOT;
+        int top = topPos + Pockets.pocketRowY(menu);
         PanelRendering.renderPanel(g,
                 left - POCKET_PANEL_PAD, top - POCKET_PANEL_PAD,
                 (right - left) + 2 * POCKET_PANEL_PAD, Pockets.SLOT + 2 * POCKET_PANEL_PAD,
@@ -57,14 +58,15 @@ public final class PocketPanelRender {
      * frames. No panel backing (PanelStyle.NONE in spirit): the two boxes
      * float in the empty space below the hotbar.
      */
-    public static void drawButtons(GuiGraphics g, int leftPos, int topPos, double mouseX, double mouseY) {
+    public static void drawButtons(GuiGraphics g, AbstractContainerMenu menu, int leftPos, int topPos,
+                                   double mouseX, double mouseY) {
         int rev = PocketHoverState.revealedHotbar();
         if (rev < 0) return;
         int c = PocketState.count(rev);
         // Both buttons always drawn; grayed at their limit (Trev 2026-06-02)
         // — − grayed at 0, + grayed at max.
-        drawBoxButton(g, PocketButtons.minusRect(leftPos, topPos, rev), false, c > 0, mouseX, mouseY);
-        drawBoxButton(g, PocketButtons.plusRect(leftPos, topPos, rev), true, c < Pockets.MAX_PER_SLOT, mouseX, mouseY);
+        drawBoxButton(g, PocketButtons.minusRect(menu, leftPos, topPos, rev), false, c > 0, mouseX, mouseY);
+        drawBoxButton(g, PocketButtons.plusRect(menu, leftPos, topPos, rev), true, c < Pockets.MAX_PER_SLOT, mouseX, mouseY);
     }
 
     private static void drawBoxButton(GuiGraphics g, int[] r, boolean plus, boolean enabled,

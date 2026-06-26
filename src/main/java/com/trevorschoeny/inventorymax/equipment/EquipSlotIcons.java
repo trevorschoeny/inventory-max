@@ -1,13 +1,8 @@
 package com.trevorschoeny.inventorymax.equipment;
 
-import com.trevorschoeny.menukit.core.MenuKitSlot;
-import com.trevorschoeny.menukit.core.SlotRendering;
-
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.Slot;
 
 /**
  * Empty-slot placeholder icons for the equipment slots — the faint elytra/totem
@@ -48,21 +43,5 @@ public final class EquipSlotIcons {
     /** Blit a placeholder at the slot's item top-left, full opacity (vanilla match). */
     public static void draw(GuiGraphics g, Identifier sprite, int itemX, int itemY) {
         g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, itemX, itemY, 16, 16, 1.0F);
-    }
-
-    /**
-     * Survival inventory screen: MenuKit's graft render draws the slots; here we
-     * overlay a placeholder on each empty equip slot. Item top-left =
-     * {@code leftPos/topPos + the slot's frame graftX/Y + 1px inset}.
-     */
-    public static void renderEmpty(AbstractContainerMenu menu, GuiGraphics g, int leftPos, int topPos) {
-        for (Slot slot : menu.slots) {
-            if (!(slot instanceof MenuKitSlot mk)) continue;
-            if (!slot.getItem().isEmpty()) continue;
-            Identifier sprite = spriteFor(mk.getGroupId());
-            if (sprite == null) continue;
-            draw(g, sprite, leftPos + mk.graftX() + SlotRendering.ITEM_INSET,
-                    topPos + mk.graftY() + SlotRendering.ITEM_INSET);
-        }
     }
 }

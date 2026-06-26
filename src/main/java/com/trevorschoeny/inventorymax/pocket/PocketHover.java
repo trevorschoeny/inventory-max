@@ -2,6 +2,8 @@ package com.trevorschoeny.inventorymax.pocket;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
 
+import net.minecraft.world.inventory.AbstractContainerMenu;
+
 /**
  * Per-frame hover computation for pockets (client). Decides which hotbar
  * slot's panels are revealed.
@@ -17,7 +19,8 @@ public final class PocketHover {
 
     private PocketHover() {}
 
-    public static void updateHover(int leftPos, int topPos, double mouseX, double mouseY) {
+    public static void updateHover(AbstractContainerMenu menu, int leftPos, int topPos,
+                                   double mouseX, double mouseY) {
         // Keep the server-safe counts current for the graft reveal predicate.
         PocketState.pushAll();
 
@@ -28,7 +31,7 @@ public final class PocketHover {
             return;
         }
 
-        int hovered = columnUnderCursor(leftPos, topPos, mouseX, mouseY);
+        int hovered = columnUnderCursor(menu, leftPos, topPos, mouseX, mouseY);
         PocketHoverState.setHoveredHotbar(hovered);
 
         // Reveal on ANY hotbar hover (even 0 pockets — the +/− panel still
@@ -37,7 +40,7 @@ public final class PocketHover {
         int newReveal = -1;
         if (hovered >= 0) {
             newReveal = hovered;
-        } else if (currently >= 0 && inSustainZone(leftPos, topPos, mouseX, mouseY, currently)) {
+        } else if (currently >= 0 && inSustainZone(menu, leftPos, topPos, mouseX, mouseY, currently)) {
             newReveal = currently;
         }
         PocketHoverState.setRevealedHotbar(newReveal);
@@ -48,8 +51,8 @@ public final class PocketHover {
             int c = PocketState.count(newReveal);
             for (int d = 0; d < c; d++) {
                 if (inBox(mouseX, mouseY,
-                        leftPos + Pockets.pocketRowX(newReveal, c, d),
-                        topPos + Pockets.pocketRowY(), 16, 16)) {
+                        leftPos + Pockets.pocketRowX(menu, newReveal, c, d),
+                        topPos + Pockets.pocketRowY(menu), 16, 16)) {
                     hoveredDepth = d;
                     break;
                 }
@@ -61,15 +64,17 @@ public final class PocketHover {
     /**
      * The hotbar column the cursor is over — counting both the hotbar slot
      * itself AND the +/− button area below it, so hovering the button area
-     * reveals the column too (Trev 2026-06-02).
+     * reveals the column too (Trev 2026-06-02). Geometry is menu-derived so it
+     * works on whatever screen the dispatch fired on.
      */
-    private static int columnUnderCursor(int leftPos, int topPos, double mx, double my) {
+    private static int columnUnderCursor(AbstractContainerMenu menu, int leftPos, int topPos,
+                                         double mx, double my) {
         for (int n = 0; n < Pockets.HOTBAR_SLOTS; n++) {
-            int x = leftPos + Pockets.pocketX(n);
+            int x = leftPos + Pockets.hotbarFrameX(menu, n);
             // The hotbar slot itself.
-            if (inBox(mx, my, x, topPos + Pockets.HOTBAR_Y, 16, 16)) return n;
+            if (inBox(mx, my, x, topPos + Pockets.hotbarItemY(menu), 16, 16)) return n;
             // The +/− button area just below it.
-            if (inBox(mx, my, x - 1, PocketButtons.panelTop(topPos), 18, PocketButtons.panelHeight())) {
+            if (inBox(mx, my, x - 1, PocketButtons.panelTop(menu, topPos), 18, PocketButtons.panelHeight())) {
                 return n;
             }
         }
@@ -83,20 +88,21 @@ public final class PocketHover {
      * follows the row's width (it widens with the pocket count); at 0 pockets it
      * falls back to the hotbar slot column so the +/− reveal still sustains.
      */
-    private static boolean inSustainZone(int leftPos, int topPos, double mx, double my, int hotbar) {
+    private static boolean inSustainZone(AbstractContainerMenu menu, int leftPos, int topPos,
+                                         double mx, double my, int hotbar) {
         int c = PocketState.count(hotbar);
         int pad = 2;
         int zleft, zright, ztop;
         if (c > 0) {
-            zleft = leftPos + Pockets.pocketRowX(hotbar, c, 0) - pad;
-            zright = leftPos + Pockets.pocketRowX(hotbar, c, c - 1) + Pockets.SLOT + pad;
-            ztop = topPos + Pockets.pocketRowY() - pad;
+            zleft = leftPos + Pockets.pocketRowX(menu, hotbar, c, 0) - pad;
+            zright = leftPos + Pockets.pocketRowX(menu, hotbar, c, c - 1) + Pockets.SLOT + pad;
+            ztop = topPos + Pockets.pocketRowY(menu) - pad;
         } else {
-            zleft = leftPos + Pockets.pocketX(hotbar) - pad;
-            zright = leftPos + Pockets.pocketX(hotbar) + Pockets.SLOT + pad;
-            ztop = topPos + Pockets.HOTBAR_Y - pad;
+            zleft = leftPos + Pockets.hotbarFrameX(menu, hotbar) - pad;
+            zright = leftPos + Pockets.hotbarFrameX(menu, hotbar) + Pockets.SLOT + pad;
+            ztop = topPos + Pockets.hotbarItemY(menu) - pad;
         }
-        int zbot = PocketButtons.panelTop(topPos) + PocketButtons.panelHeight() + pad;
+        int zbot = PocketButtons.panelTop(menu, topPos) + PocketButtons.panelHeight() + pad;
         return inBox(mx, my, zleft, ztop, zright - zleft, zbot - ztop);
     }
 
