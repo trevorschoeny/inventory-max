@@ -2,7 +2,6 @@ package com.trevorschoeny.inventorymax.mixin;
 
 import com.trevorschoeny.inventorymax.equipment.EquipmentSlots;
 import com.trevorschoeny.inventorymax.pocket.SliceStorage;
-import com.trevorschoeny.menukit.core.InteractionPolicy;
 import com.trevorschoeny.menukit.core.MKCSlots;
 import com.trevorschoeny.menukit.core.Storage;
 
@@ -50,16 +49,10 @@ public abstract class InventoryMenuEquipmentMixin {
                 .panel(EquipmentSlots.MOD_ID + ":" + EquipmentSlots.ELYTRA_GROUP)
                 .group(EquipmentSlots.ELYTRA_GROUP)
                 .storage(new SliceStorage(backing, EquipmentSlots.ELYTRA_INDEX, 1, player))
-                .policy(InteractionPolicy.input(EquipmentSlots::isElytra)
-                        .withMaxStackSize(stack -> 1))
                 .layout(EquipmentSlots.SLOT_X, EquipmentSlots.ELYTRA_Y, 1)
-                // Curse of Binding: a cursed elytra can't be removed while alive
-                // (survival only; creative + death are handled by the library /
-                // §0052). The §0053 MKC primitive — equipment-semantic opt-in.
-                .bindsCursedItems()
-                // Mending: a damaged Mending elytra here repairs from XP orbs
-                // like worn armor — the MKC mending primitive's per-slot opt-in.
-                .mendsFromXp()
+                // Behavior-FREE creation: the accept-filter + single-item cap (GATING),
+                // Curse-of-Binding (BINDING), and XP mending (MENDING) are declared by
+                // the slot's address in EquipmentSlots.declareSlotBehavior().
                 .register();
 
         // Totem slot (bottom, just above the offhand) — accepts only totems, one item.
@@ -67,16 +60,9 @@ public abstract class InventoryMenuEquipmentMixin {
                 .panel(EquipmentSlots.MOD_ID + ":" + EquipmentSlots.TOTEM_GROUP)
                 .group(EquipmentSlots.TOTEM_GROUP)
                 .storage(new SliceStorage(backing, EquipmentSlots.TOTEM_INDEX, 1, player))
-                .policy(InteractionPolicy.input(EquipmentSlots::isTotem)
-                        .withMaxStackSize(stack -> 1))
                 .layout(EquipmentSlots.SLOT_X, EquipmentSlots.TOTEM_Y, 1)
-                // Curse of Binding: a cursed totem (uncommon, but possible via
-                // the component) is likewise bound to its slot while alive.
-                .bindsCursedItems()
-                // Mending: opted in for consistency. Totems aren't damageable, so
-                // none will ever qualify (mendable = damaged + Mending) — harmless,
-                // and future-proofs a modded damageable totem-like item.
-                .mendsFromXp()
+                // Behavior-FREE creation: GATING (totem-only + single item), BINDING,
+                // and MENDING are declared by address in EquipmentSlots.declareSlotBehavior().
                 .register();
     }
 }

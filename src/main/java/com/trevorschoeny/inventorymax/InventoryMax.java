@@ -50,6 +50,12 @@ public class InventoryMax implements ModInitializer {
         // construction so the equipment slot mixin can bind it.
         EquipmentSlots.register();
 
+        // Declare the slots' server behavior by address (behavior-by-address; the
+        // creation mixins build behavior-free). Pockets opt into MENDING; the elytra
+        // and totem slots get accept-filter GATING + Curse-of-Binding + MENDING.
+        Pockets.declareSlotBehavior();
+        EquipmentSlots.declareSlotBehavior();
+
         // C2S payload types — registered on both sides (the codec must be
         // known wherever the payload travels).
         PayloadTypeRegistry.playC2S().register(PocketRotateC2S.TYPE, PocketRotateC2S.CODEC);

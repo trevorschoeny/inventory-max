@@ -1,7 +1,11 @@
 package com.trevorschoeny.inventorymax.pocket;
 
+import com.trevorschoeny.menukit.core.CreatedSlotAdapter;
+import com.trevorschoeny.menukit.core.MKCBehaviorKeys;
 import com.trevorschoeny.menukit.core.StorageAttachment;
 import com.trevorschoeny.menukit.inject.VanillaSlotResolver;
+import com.trevorschoeny.menukit.window.TriBool;
+import com.trevorschoeny.menukit.window.Window;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
@@ -68,6 +72,21 @@ public final class Pockets {
     /** Common-init registration. Call from the main entrypoint. */
     public static void register() {
         POCKETS = StorageAttachment.playerAttached(MOD_ID, "pockets", TOTAL);
+    }
+
+    /**
+     * Declares each pocket slot's MENDING opt-in by the slot's address, once at
+     * common init — behavior-by-address (the creation mixin is behavior-free). A
+     * damaged Mending item in any pocket joins the XP-orb repair pool. Idempotent.
+     */
+    public static void declareSlotBehavior() {
+        for (int n = 0; n < HOTBAR_SLOTS; n++) {
+            for (int d = 0; d < MAX_PER_SLOT; d++) {
+                String g = groupId(n, d);
+                Window.slot(CreatedSlotAdapter.addressOf(MOD_ID + ":" + g, g, 0))
+                        .set(MKCBehaviorKeys.MENDING, TriBool.TRUE);
+            }
+        }
     }
 
     /** Flat index into the 27-slot backing for (hotbar, depth). */

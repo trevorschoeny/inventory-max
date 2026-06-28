@@ -1,7 +1,14 @@
 package com.trevorschoeny.inventorymax.equipment;
 
+import com.trevorschoeny.menukit.core.CreatedSlotAdapter;
+import com.trevorschoeny.menukit.core.GatingContext;
+import com.trevorschoeny.menukit.core.MKCBehaviorKeys;
+import com.trevorschoeny.menukit.core.SlotGate;
 import com.trevorschoeny.menukit.core.Storage;
 import com.trevorschoeny.menukit.core.StorageAttachment;
+import com.trevorschoeny.menukit.window.Address;
+import com.trevorschoeny.menukit.window.TriBool;
+import com.trevorschoeny.menukit.window.Window;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -9,6 +16,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+
+import java.util.function.Predicate;
 
 /**
  * Equipment Slots — constants, the server-persistent content storage, and the
@@ -84,6 +93,29 @@ public final class EquipmentSlots {
     /** Common-init registration. Call from the main entrypoint. */
     public static void register() {
         EQUIPMENT = StorageAttachment.playerAttached(MOD_ID, "equipment", TOTAL);
+    }
+
+    /**
+     * Declares the equipment slots' server behavior by address, once at common
+     * init — behavior-by-address (the creation mixin is behavior-free): GATING
+     * (accept-filter + single-item cap), Curse-of-Binding (BINDING), and XP
+     * mending (MENDING). Idempotent.
+     */
+    public static void declareSlotBehavior() {
+        declare(ELYTRA_GROUP, EquipmentSlots::isElytra);
+        declare(TOTEM_GROUP, EquipmentSlots::isTotem);
+    }
+
+    /** GATING (filter + single item) + BINDING + MENDING on the group's one slot, by address. */
+    private static void declare(String group, Predicate<ItemStack> accepts) {
+        Address a = CreatedSlotAdapter.addressOf(MOD_ID + ":" + group, group, 0);
+        Window.slot(a).set(MKCBehaviorKeys.GATING, new SlotGate() {
+            @Override public boolean mayPlace(ItemStack stack, GatingContext ctx) { return accepts.test(stack); }
+            @Override public boolean mayPickup(Player player, GatingContext ctx) { return true; }
+            @Override public int maxStackSize(ItemStack stack, int vanillaMax) { return Math.min(1, vanillaMax); }
+        });
+        Window.slot(a).set(MKCBehaviorKeys.BINDING, TriBool.TRUE);
+        Window.slot(a).set(MKCBehaviorKeys.MENDING, TriBool.TRUE);
     }
 
     // ─── Behavior reads ──────────────────────────────────────────────────

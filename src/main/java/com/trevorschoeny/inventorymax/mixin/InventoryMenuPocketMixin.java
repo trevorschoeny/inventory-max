@@ -55,10 +55,9 @@ public abstract class InventoryMenuPocketMixin {
                         // Server-safe predicate (no client imports); only
                         // evaluated client-side by MenuKit.
                         .revealWhen(() -> PocketHoverState.isRevealed(hotbar, depth))
-                        // Ambient mending: a damaged Mending item stored in any
-                        // pocket repairs from XP orbs. Server-side all pockets are
-                        // active, so this works regardless of client reveal state.
-                        .mendsFromXp()
+                        // Behavior-FREE creation: ambient MENDING (a damaged Mending
+                        // item in any pocket repairs from XP) is declared by the slot's
+                        // address in Pockets.declareSlotBehavior(), not on the builder.
                         .register();
             }
         }
