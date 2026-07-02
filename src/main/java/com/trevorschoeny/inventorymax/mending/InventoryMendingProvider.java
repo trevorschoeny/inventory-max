@@ -25,8 +25,9 @@ import java.util.List;
  * slot</b> — that's the main hand, which vanilla already mends; skipping it keeps
  * it from appearing twice in the unified pool. Offhand and armor aren't in 0–35
  * and are likewise vanilla's already. The equip slots and pockets opt in
- * separately at the slot level ({@code mendsFromXp()}, always on); this is the
- * toggleable vanilla-inventory layer.
+ * separately at the slot level (the MKC mending behavior — {@code SlotSpec.mending()}
+ * / {@code MKCBehaviorKeys.MENDING}, always on); this is the toggleable
+ * vanilla-inventory layer.
  *
  * <h3>Server-side</h3>
  * Gathered on the server during XP pickup. Gated by

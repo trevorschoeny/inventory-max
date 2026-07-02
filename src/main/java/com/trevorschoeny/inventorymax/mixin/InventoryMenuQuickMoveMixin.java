@@ -59,8 +59,9 @@ public abstract class InventoryMenuQuickMoveMixin {
         if (index == elytraIdx || index == totemIdx) {
             // No binding check needed here: vanilla's doClick pre-checks
             // slot.mayPickup before it ever calls quickMoveStack, and the §0053
-            // MKC primitive (bindsCursedItems) makes mayPickup false for a bound
-            // item — so a bound item's shift-click never reaches this router.
+            // MKC binding behavior (SlotSpec.binding() / MKCBehaviorKeys.BINDING)
+            // makes mayPickup false for a bound item — so a bound item's
+            // shift-click never reaches this router.
             // Curse of Binding is fully library-enforced on every removal path.
             cir.setReturnValue(inventoryMax$moveAndFinish(player, from, live, 9, 45, false));
             return;
