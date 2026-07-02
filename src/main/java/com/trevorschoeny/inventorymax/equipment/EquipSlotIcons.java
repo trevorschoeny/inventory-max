@@ -1,6 +1,6 @@
 package com.trevorschoeny.inventorymax.equipment;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
@@ -41,7 +41,7 @@ public final class EquipSlotIcons {
     }
 
     /** Blit a placeholder at the slot's item top-left, full opacity (vanilla match). */
-    public static void draw(GuiGraphics g, Identifier sprite, int itemX, int itemY) {
+    public static void draw(GuiGraphicsExtractor g, Identifier sprite, int itemX, int itemY) {
         g.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, itemX, itemY, 16, 16, 1.0F);
     }
 }

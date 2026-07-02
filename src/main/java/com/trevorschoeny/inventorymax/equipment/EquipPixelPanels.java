@@ -98,7 +98,7 @@ public final class EquipPixelPanels {
      */
     private static ScreenOrigin anchor(int slotsAboveOffhand, int pairIndex) {
         if (!IMConfig.equipmentSlotsEnabled()) return null; // feature off → no presentation
-        if (!(Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> screen)) {
+        if (!(Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?> screen)) {
             return null;
         }
         if (screen instanceof CreativeModeInventoryScreen) {
@@ -156,7 +156,7 @@ public final class EquipPixelPanels {
          * (the panel is skipped there anyway; this is belt-and-braces).
          */
         private static MKCSlot find(String group) {
-            if (!(Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> acs)) {
+            if (!(Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?> acs)) {
                 return null;
             }
             for (Slot s : acs.getMenu().slots) {

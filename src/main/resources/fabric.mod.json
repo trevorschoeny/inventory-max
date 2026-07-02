@@ -18,7 +18,7 @@
   "depends": {
     "fabricloader": ">=0.15.0",
     "fabric-api": "*",
-    "minecraft": "~1.21",
+    "minecraft": "~26.2",
     "menukit": ">=2.0.0",
     "menukit-containers": ">=2.0.0",
     "inventoryplus": ">=1.2.0"

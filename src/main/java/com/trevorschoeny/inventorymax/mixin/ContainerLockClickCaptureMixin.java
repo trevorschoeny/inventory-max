@@ -7,7 +7,7 @@ import com.trevorschoeny.inventorymax.containerlocks.ContainerLocks;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -33,7 +33,7 @@ public abstract class ContainerLockClickCaptureMixin {
 
     @WrapMethod(method = "clicked")
     private void inventoryMax$captureActingPlayer(
-            int slotId, int button, ClickType clickType, Player player, Operation<Void> original) {
+            int slotId, int button, ContainerInput clickType, Player player, Operation<Void> original) {
         ContainerLocks.setActingPlayer(player);
         try {
             original.call(slotId, button, clickType, player);

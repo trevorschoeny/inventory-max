@@ -12,7 +12,7 @@ import com.trevorschoeny.menukit.inject.ScreenPanelAdapter;
 import com.trevorschoeny.menukit.inject.SlotScreenRect;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 
 import java.util.ArrayList;
@@ -146,7 +146,7 @@ public final class PocketPixelPanels {
     }
 
     private static AbstractContainerScreen<?> containerScreen() {
-        return Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> acs
+        return Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?> acs
                 ? acs : null;
     }
 
@@ -191,7 +191,7 @@ public final class PocketPixelPanels {
 
         @Override
         public void render(RenderContext ctx) {
-            GuiGraphics g = ctx.graphics();
+            GuiGraphicsExtractor g = ctx.graphics();
             int x = ctx.originX() + childX;
             int y = ctx.originY();
             int w = getWidth(), h = getHeight();

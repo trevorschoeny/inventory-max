@@ -11,7 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -57,7 +57,7 @@ public final class EquipAutoRestock {
         totemSlotFilled = filledNow;
 
         if (!justConsumed) return;                // only the full→empty transition
-        if (mc.screen != null) return;            // gameplay only — not while editing the inventory
+        if (mc.gui.screen() != null) return;            // gameplay only — not while editing the inventory
         if (!IMConfig.equipmentSlotsEnabled()) return; // feature off → no totem restock
         if (!IPConfig.autoRestockItem()) return;  // follow the auto-restock toggle
 
@@ -79,7 +79,7 @@ public final class EquipAutoRestock {
         // then shift-click it — our quick-move routing drops the totem into the
         // (now-empty) equip totem slot.
         int menuSlot = source < AutoRestockSearch.MAIN_INV_START ? source + HOTBAR_MENU_OFFSET : source;
-        gameMode.handleInventoryMouseClick(
-                player.inventoryMenu.containerId, menuSlot, 0, ClickType.QUICK_MOVE, player);
+        gameMode.handleContainerInput(
+                player.inventoryMenu.containerId, menuSlot, 0, ContainerInput.QUICK_MOVE, player);
     }
 }

@@ -66,9 +66,9 @@ public class InventoryMax implements ModInitializer {
 
         // C2S payload types — registered on both sides (the codec must be
         // known wherever the payload travels).
-        PayloadTypeRegistry.playC2S().register(PocketRotateC2S.TYPE, PocketRotateC2S.CODEC);
-        PayloadTypeRegistry.playC2S().register(PocketEvictC2S.TYPE, PocketEvictC2S.CODEC);
-        PayloadTypeRegistry.playC2S().register(PocketQuickMoveC2S.TYPE, PocketQuickMoveC2S.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(PocketRotateC2S.TYPE, PocketRotateC2S.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(PocketEvictC2S.TYPE, PocketEvictC2S.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(PocketQuickMoveC2S.TYPE, PocketQuickMoveC2S.CODEC);
 
         // Server-side receivers — perform the authoritative pocket mutation
         // on the server thread (hop off the network thread via server.execute).

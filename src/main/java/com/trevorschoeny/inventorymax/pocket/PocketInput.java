@@ -53,7 +53,7 @@ public final class PocketInput {
     }
 
     private static void onClientTick(Minecraft mc) {
-        boolean inWorld = mc.screen == null && mc.player != null;
+        boolean inWorld = mc.gui.screen() == null && mc.player != null;
         int selected = (mc.player != null) ? mc.player.getInventory().getSelectedSlot() : -1;
 
         boolean fwd = false, back = false;

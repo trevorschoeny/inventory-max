@@ -17,7 +17,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
  * and the pockets (above), so the cursor can travel the whole stack without it
  * collapsing.
  *
- * <p><b>Driven by {@code ScreenEvents.beforeRender}</b> — the per-frame seam
+ * <p><b>Driven by {@code ScreenEvents.beforeExtract}</b> — the per-frame seam
  * that replaced the deleted presence layer's {@code onPrepare}: state updates
  * once per frame before the pixel panels resolve their origins (which read it).
  * All geometry is absolute screen pixels off the live hotbar slots
@@ -33,7 +33,7 @@ public final class PocketHover {
     public static void register() {
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (screen instanceof AbstractContainerScreen<?> acs) {
-                ScreenEvents.beforeRender(screen).register(
+                ScreenEvents.beforeExtract(screen).register(
                         (s, graphics, mouseX, mouseY, tickDelta) ->
                                 updateHover(acs, mouseX, mouseY));
             }

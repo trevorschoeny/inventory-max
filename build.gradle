@@ -11,7 +11,9 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 plugins {
-    id 'fabric-loom' version '1.14-SNAPSHOT'
+    // 26.x migration (2026-07-02): Loom plugin id is namespaced at 1.15+;
+    // 1.17 is the 26.2-era line. Version pinned at the workspace root.
+    id 'net.fabricmc.fabric-loom' version '1.17-SNAPSHOT'
     id 'java'
     id 'com.modrinth.minotaur' version '2.+'
 }
@@ -22,41 +24,47 @@ group   = property('maven_group')
 base.archivesName = 'inventory-max'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    // Minecraft 26.x runs on Java 25.
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
 }
 
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
     maven { url 'https://maven.terraformersmc.com/releases/' }
-    maven { url 'https://maven.isxander.dev/releases/' }
+    // 26.x: YACL's 26.2 builds ship via the Modrinth maven only
+    // (isxander's own maven stops at 3.8.x; verified 2026-07-02).
+    maven { url 'https://api.modrinth.com/maven' }
 }
 
 dependencies {
+    // 26.x: the game is unobfuscated — no mappings line, and mod deps use the
+    // standard java configurations (modImplementation → implementation etc.).
     minecraft "com.mojang:minecraft:${property('minecraft_version')}"
-    mappings loom.officialMojangMappings()
-    modImplementation "net.fabricmc:fabric-loader:${property('loader_version')}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${property('fabric_version')}"
+    implementation "net.fabricmc:fabric-loader:${property('loader_version')}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${property('fabric_version')}"
 
     // ModMenu — surfaces IM's config screen from the mods list. Soft dep.
-    modCompileOnly "com.terraformersmc:modmenu:17.0.0"
-    modLocalRuntime "com.terraformersmc:modmenu:17.0.0"
+    // (⚠️ beta — only 26.2 build available.)
+    compileOnly "com.terraformersmc:modmenu:20.0.0-beta.4"
+    localRuntime "com.terraformersmc:modmenu:20.0.0-beta.4"
 
     // YACL — config-screen framework, JIJ'd into IM's jar (§0031, agency
-    // standard). modImplementation = compile + dev runtime; include = JIJ.
-    modImplementation "dev.isxander:yet-another-config-lib:3.8.1+1.21.11-fabric"
-    include          "dev.isxander:yet-another-config-lib:3.8.1+1.21.11-fabric"
+    // standard). implementation = compile + dev runtime; include = JIJ.
+    implementation "maven.modrinth:yacl:3.9.5+26.2-fabric"
+    include        "maven.modrinth:yacl:3.9.5+26.2-fabric"
 
     // MenuKit-Containers — the §0045 slot-graft kit (MenuKitGraft, KeyedStorages,
     // StorageAttachment, MKSlotState, MenuKitGraftRender, MenuKitSlot). MenuKit
     // (the UI lib: HudRegion, MKHudPanel, Storage) comes transitively via MKC's
-    // one-way `api` edge — same path validator-mkc uses.
-    implementation project(path: ':menukit-containers', configuration: 'namedElements')
+    // one-way `api` edge — same path validator-mkc uses. (26.x: plain project
+    // deps — the `namedElements` variant is gone with the remap layer.)
+    implementation project(':menukit-containers')
 
     // Inventory Plus — IM composes IP's public cycler + HUD registry
     // (HotbarCyclableRegistry, CycleHudRegistry, CycleView, HudMode) and
     // reads IPConfig for cohabitation flags. Dependency is one-way (IM→IP).
-    implementation project(path: ':inventory-plus', configuration: 'namedElements')
+    implementation project(':inventory-plus')
 }
 
 loom {
@@ -92,7 +100,8 @@ modrinth {
     changelog = '''Inventory Max 1.0.0
 
 Initial release: Container Locks, Equipment Slots (elytra + totem), and Pockets. Requires Inventory Plus, MenuKit, and MenuKit: Containers.'''
-    uploadFile = remapJar
+    // 26.x: no remap step — `jar` IS the shippable artifact (remapJar is gone).
+    uploadFile = jar
     gameVersions = [property('minecraft_version')]
     loaders = ["fabric"]
     dependencies {

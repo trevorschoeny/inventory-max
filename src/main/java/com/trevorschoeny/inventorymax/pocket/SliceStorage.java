@@ -2,7 +2,7 @@ package com.trevorschoeny.inventorymax.pocket;
 
 import com.trevorschoeny.menukit.core.Storage;
 
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
