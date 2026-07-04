@@ -35,8 +35,17 @@ public final class EquipAutoRestock {
 
     private EquipAutoRestock() {}
 
-    /** Bare totem matched against the inventory (by item kind, not components). */
-    private static final ItemStack TOTEM = new ItemStack(Items.TOTEM_OF_UNDYING);
+    /** Bare totem matched against the inventory (by item kind, not components).
+     *  26.2: constructed lazily — ItemStack's ctor now requires the item's
+     *  data components to be BOUND ("Components not bound yet" NPE otherwise),
+     *  and class-init runs on the first client tick, before registry freeze
+     *  completes. First tick() call after binding constructs it once. */
+    private static ItemStack totemProbe = null;
+
+    private static ItemStack totemProbe() {
+        if (totemProbe == null) totemProbe = new ItemStack(Items.TOTEM_OF_UNDYING);
+        return totemProbe;
+    }
 
     /** InventoryMenu maps inventory hotbar slots 0–8 to menu slots 36–44. */
     private static final int HOTBAR_MENU_OFFSET = 36;
@@ -65,7 +74,7 @@ public final class EquipAutoRestock {
         // A backup totem may live in a pocket too — outside the 0–35 model — so
         // include the cyclers' extra slots in the search.
         List<ExtraSlot> extras = HotbarCyclableRegistry.extraSearchSlots(player);
-        int source = AutoRestockSearch.findSource(inv, TOTEM, AutoRestockSearch.NONE, extras);
+        int source = AutoRestockSearch.findSource(inv, totemProbe(), AutoRestockSearch.NONE, extras);
         if (source == AutoRestockSearch.NONE) return;
 
         // A pocket source can't be shift-clicked client-side in-world (the pocket
