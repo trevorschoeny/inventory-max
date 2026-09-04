@@ -97,9 +97,11 @@ modrinth {
     versionNumber = property('inventorymax_version')
     versionName = "Inventory Max ${property('inventorymax_version')}"
     versionType = "release"
-    changelog = '''Inventory Max 1.0.0
-
-Initial release: Container Locks, Equipment Slots (elytra + totem), and Pockets. Requires Inventory Plus, MenuKit, and MenuKit: Containers.'''
+    // ci-cd.md stage 5: the player-facing changelog lives in changelog.md, one entry,
+    // overwritten each release (git keeps the history). Hardcoding it here went stale.
+    changelog = file('changelog.md').text
+    // ci-cd.md stage 7: the README is the public description; `modrinthSyncBody` pushes it.
+    syncBodyFrom = file('README.md').text
     // 26.x: no remap step — `jar` IS the shippable artifact (remapJar is gone).
     uploadFile = jar
     gameVersions = [property('minecraft_version')]
