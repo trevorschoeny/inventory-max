@@ -31,7 +31,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class EquipElytraWingsMixin {
 
     @Redirect(
-            method = "submit",
+            // Full descriptor: WingsLayer also carries a synthetic bridge named `submit`
+            // (erased EntityRenderState param), so a bare name would match two methods.
+            method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/HumanoidRenderState;FF)V",
             at = @At(value = "FIELD",
                     target = "Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;chestEquipment:Lnet/minecraft/world/item/ItemStack;",
                     opcode = Opcodes.GETFIELD))
