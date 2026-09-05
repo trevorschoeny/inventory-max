@@ -4,7 +4,7 @@ import com.trevorschoeny.inventoryplus.autorestock.AutoRestockSuppression;
 import com.trevorschoeny.inventoryplus.cyclable.CyclerOperation;
 import com.trevorschoeny.inventoryplus.cyclable.HotbarCyclable;
 import com.trevorschoeny.inventorymax.config.IMConfig;
-import com.trevorschoeny.menukit.core.Storage;
+import com.trevlar.menukit.core.Storage;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.world.entity.player.Player;

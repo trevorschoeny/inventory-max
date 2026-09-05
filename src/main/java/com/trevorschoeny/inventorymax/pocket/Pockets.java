@@ -1,10 +1,10 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevorschoeny.menukit.core.CreatedSlotAdapter;
-import com.trevorschoeny.menukit.core.MKCBehaviorKeys;
-import com.trevorschoeny.menukit.core.StorageAttachment;
-import com.trevorschoeny.menukit.window.TriBool;
-import com.trevorschoeny.menukit.window.Window;
+import com.trevlar.menukit.core.CreatedSlotAdapter;
+import com.trevlar.menukit.core.MKCBehaviorKeys;
+import com.trevlar.menukit.core.StorageAttachment;
+import com.trevlar.menukit.window.TriBool;
+import com.trevlar.menukit.window.Window;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;

@@ -1,7 +1,7 @@
 package com.trevorschoeny.inventorymax.pocket;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
-import com.trevorschoeny.menukit.inject.SlotScreenRect;
+import com.trevlar.menukit.inject.SlotScreenRect;
 
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;

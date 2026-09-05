@@ -1,6 +1,6 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevorschoeny.menukit.core.Storage;
+import com.trevlar.menukit.core.Storage;
 
 import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.server.level.ServerPlayer;

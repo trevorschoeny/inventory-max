@@ -1,7 +1,7 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevorschoeny.menukit.core.MKCSlot;
-import com.trevorschoeny.menukit.core.Storage;
+import com.trevlar.menukit.core.MKCSlot;
+import com.trevlar.menukit.core.Storage;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;

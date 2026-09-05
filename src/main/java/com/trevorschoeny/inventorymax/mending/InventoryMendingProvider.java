@@ -1,7 +1,7 @@
 package com.trevorschoeny.inventorymax.mending;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
-import com.trevorschoeny.menukit.core.MendingCandidates;
+import com.trevlar.menukit.core.MendingCandidates;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;

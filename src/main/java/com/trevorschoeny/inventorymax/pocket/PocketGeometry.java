@@ -1,9 +1,9 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevorschoeny.menukit.core.MKCSlot;
-import com.trevorschoeny.menukit.core.MKCSlotAccess;
-import com.trevorschoeny.menukit.inject.SlotScreenRect;
-import com.trevorschoeny.menukit.inject.VanillaSlotResolver;
+import com.trevlar.menukit.core.MKCSlot;
+import com.trevlar.menukit.core.MKCSlotAccess;
+import com.trevlar.menukit.inject.SlotScreenRect;
+import com.trevlar.menukit.inject.VanillaSlotResolver;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;

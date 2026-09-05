@@ -1,15 +1,15 @@
 package com.trevorschoeny.inventorymax.pocket;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
-import com.trevorschoeny.menukit.core.Panel;
-import com.trevorschoeny.menukit.core.PanelElement;
-import com.trevorschoeny.menukit.core.PanelPosition;
-import com.trevorschoeny.menukit.core.PanelStyle;
-import com.trevorschoeny.menukit.core.RenderContext;
-import com.trevorschoeny.menukit.core.SlotElement;
-import com.trevorschoeny.menukit.inject.ScreenOrigin;
-import com.trevorschoeny.menukit.inject.ScreenPanelAdapter;
-import com.trevorschoeny.menukit.inject.SlotScreenRect;
+import com.trevlar.menukit.core.Panel;
+import com.trevlar.menukit.core.PanelElement;
+import com.trevlar.menukit.core.PanelPosition;
+import com.trevlar.menukit.core.PanelStyle;
+import com.trevlar.menukit.core.RenderContext;
+import com.trevlar.menukit.core.SlotElement;
+import com.trevlar.menukit.inject.ScreenOrigin;
+import com.trevlar.menukit.inject.ScreenPanelAdapter;
+import com.trevlar.menukit.inject.SlotScreenRect;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

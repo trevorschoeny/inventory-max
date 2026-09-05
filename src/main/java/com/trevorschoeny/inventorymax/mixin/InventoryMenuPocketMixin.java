@@ -3,8 +3,8 @@ package com.trevorschoeny.inventorymax.mixin;
 import com.trevorschoeny.inventorymax.pocket.PocketHoverState;
 import com.trevorschoeny.inventorymax.pocket.Pockets;
 import com.trevorschoeny.inventorymax.pocket.SliceStorage;
-import com.trevorschoeny.menukit.core.MKCSlots;
-import com.trevorschoeny.menukit.core.Storage;
+import com.trevlar.menukit.core.MKCSlots;
+import com.trevlar.menukit.core.Storage;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;

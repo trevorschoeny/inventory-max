@@ -2,10 +2,10 @@ package com.trevorschoeny.inventorymax.equipment;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
 
-import com.trevorschoeny.menukit.core.ItemDisplay;
-import com.trevorschoeny.menukit.core.PanelStyle;
-import com.trevorschoeny.menukit.hud.MKHudAnchor;
-import com.trevorschoeny.menukit.hud.MKHudPanel;
+import com.trevlar.menukit.core.ItemDisplay;
+import com.trevlar.menukit.core.PanelStyle;
+import com.trevlar.menukit.hud.MKHudAnchor;
+import com.trevlar.menukit.hud.MKHudPanel;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.EquipmentSlot;

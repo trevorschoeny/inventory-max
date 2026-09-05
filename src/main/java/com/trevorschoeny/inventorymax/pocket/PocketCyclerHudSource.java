@@ -5,7 +5,7 @@ import com.trevorschoeny.inventoryplus.cyclable.CycleHudRegistry;
 import com.trevorschoeny.inventoryplus.cyclable.CycleHudSource;
 import com.trevorschoeny.inventoryplus.cyclable.CycleView;
 import com.trevorschoeny.inventorymax.config.IMConfig;
-import com.trevorschoeny.menukit.core.Storage;
+import com.trevlar.menukit.core.Storage;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
