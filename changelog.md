@@ -1,1 +1,1 @@
-Now runs on Minecraft 26.2. Same pockets, container locks, and equipment slots as 1.0.0.
+Built against MenuKit 3.0.0. Requires MenuKit 3.0.0 or newer. No feature changes.
