@@ -4,7 +4,7 @@ Server-side companion to [Inventory Plus](https://modrinth.com/mod/inventory-plu
 
 ## Features
 
-Container Locks let you lock a slot inside a placed chest, shulker, or barrel so sorting, automation, and stray clicks skip it. Locks are visible to every player on the server. Shulker locks survive breaking and replacing the box.
+Container Locks let you lock a slot inside a placed chest, shulker, or barrel so sorting, automation, and stray clicks skip it. These locks are shared: every player on the server sees them, and they survive a shulker being broken and replaced. Inventory Plus 1.5.0 and newer locks container slots too, on its own, for you alone. When both mods are installed the per-player locks are the ones you see and set, and Inventory Max's shared locks stay in place underneath for containers Inventory Plus cannot identify.
 
 Equipment Slots add dedicated slots for an elytra and a totem, so you can keep both ready without giving up your chestplate or a hand. They work in survival and creative. Slot contents survive death like vanilla equipment, respect Curse of Binding, and can mend from XP.
 
