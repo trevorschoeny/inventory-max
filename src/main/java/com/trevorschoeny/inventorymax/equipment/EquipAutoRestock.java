@@ -6,6 +6,7 @@ import com.trevorschoeny.inventoryplus.autorestock.AutoRestockSearch;
 import com.trevorschoeny.inventoryplus.config.IPConfig;
 import com.trevorschoeny.inventoryplus.cyclable.HotbarCyclable.ExtraSlot;
 import com.trevorschoeny.inventoryplus.cyclable.HotbarCyclableRegistry;
+import com.trevorschoeny.inventoryplus.lockeditems.LockedItemUser;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -74,7 +75,11 @@ public final class EquipAutoRestock {
         // A backup totem may live in a pocket too — outside the 0–35 model — so
         // include the cyclers' extra slots in the search.
         List<ExtraSlot> extras = HotbarCyclableRegistry.extraSearchSlots(player);
-        int source = AutoRestockSearch.findSource(inv, totemProbe(), AutoRestockSearch.NONE, extras);
+        // Same bucket IP refills the offhand under (see class doc) — the totem
+        // is a non-damageable item, so this follows Item Restock's locked-item
+        // setting, per IP 1.4.0's Locked Items (Trev, 2026-09-06).
+        int source = AutoRestockSearch.findSource(
+                inv, totemProbe(), AutoRestockSearch.NONE, extras, LockedItemUser.RESTOCK_ITEM);
         if (source == AutoRestockSearch.NONE) return;
 
         // A pocket source can't be shift-clicked client-side in-world (the pocket
