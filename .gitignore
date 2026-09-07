@@ -19,3 +19,6 @@ bin/
 
 # Claude worktrees / metadata
 .claude/
+
+# Dev runtime: logs, saves, configs. Matches inventory-plus.
+run/
