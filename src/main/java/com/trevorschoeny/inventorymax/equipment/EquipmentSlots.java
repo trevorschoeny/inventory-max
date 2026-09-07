@@ -66,10 +66,11 @@ public final class EquipmentSlots {
     //
     // The slots stack directly above the vanilla offhand slot. Vanilla draws
     // the offhand at item (77, 62) → its 18px frame sits at (76, 61). A registered
-    // slot's renderX/Y is its frame top-left (the render helper draws the frame
-    // there and insets the 16px item by 1px), so we use frame coords here, 1px
-    // up-left of the item, exactly like the Pocket column aligns to the hotbar.
-    // Pixel-tunable — Trev nudged the pockets by a px; same is expected here.
+    // slot's Slot.x/y (written by SlotElement each frame, MenuKit 3.2.0) is its
+    // frame top-left, and vanilla insets the 16px item by 1px the same way it
+    // does for any slot, so we use frame coords here, 1px up-left of the item,
+    // exactly like the Pocket column aligns to the hotbar. Pixel-tunable — Trev
+    // nudged the pockets by a px; same is expected here.
 
     /** Frame x — aligned above the offhand frame (offhand item 77 → frame 76). */
     public static final int SLOT_X = 76;

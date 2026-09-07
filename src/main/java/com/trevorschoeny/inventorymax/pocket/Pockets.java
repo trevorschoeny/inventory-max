@@ -114,7 +114,9 @@ public final class Pockets {
      * <p>This is the original <b>vertical</b> column layout — now used only as
      * the slot's construction seed. At runtime the revealed pockets are moved
      * into the floating horizontal row below ({@link #pocketRowX} /
-     * {@link #pocketRowY}) via §0047 {@code setRenderPosition}.
+     * {@link #pocketRowY}); each frame the pocket's {@code SlotElement} writes
+     * that row position straight into the live slot's {@code Slot.x/y}
+     * (MenuKit 3.2.0), which is what vanilla actually draws.
      */
     public static int pocketY(int depth) {
         return HOTBAR_Y - HOTBAR_GAP - (depth + 1) * SLOT;
