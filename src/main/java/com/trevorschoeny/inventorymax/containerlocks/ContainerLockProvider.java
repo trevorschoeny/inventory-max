@@ -1,7 +1,7 @@
 package com.trevorschoeny.inventorymax.containerlocks;
 
-import com.trevorschoeny.inventoryplus.lockedslots.SlotLockProvider;
-import com.trevorschoeny.inventoryplus.sort.ContainerOpenTracker;
+import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
+import com.trevorschoeny.inventoryplus.api.SlotLockProvider;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
@@ -66,7 +66,7 @@ public final class ContainerLockProvider implements SlotLockProvider {
     private static boolean isClientPlacedContainer(Slot slot) {
         if (!"Render thread".equals(Thread.currentThread().getName())) return false;
         if (slot.container instanceof Inventory) return false;
-        Block b = ContainerOpenTracker.openContainerBlock();
+        Block b = InventoryPlusApi.openContainerBlock();
         return b instanceof ChestBlock
                 || b instanceof TrappedChestBlock
                 || b instanceof BarrelBlock

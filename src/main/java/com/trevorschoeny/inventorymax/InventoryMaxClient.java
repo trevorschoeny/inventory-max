@@ -1,7 +1,6 @@
 package com.trevorschoeny.inventorymax;
 
-import com.trevorschoeny.inventoryplus.cyclable.HotbarCyclableRegistry;
-import com.trevorschoeny.inventoryplus.lockedslots.LockedSlots;
+import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.config.IMKeybinds;
 import com.trevorschoeny.inventorymax.containerlocks.ContainerLockProvider;
@@ -44,7 +43,7 @@ public class InventoryMaxClient implements ClientModInitializer {
         // Register pockets as a hotbar cycler so Auto Tool Switch + Auto-Restock
         // can source tools from them (Tier 2 dynamic switch) — the search/cycle
         // sibling of PocketCyclerHudSource's render contribution.
-        HotbarCyclableRegistry.register(PocketCyclable.INSTANCE);
+        InventoryPlusApi.registerCyclable(PocketCyclable.INSTANCE);
         // Equipment-slot HUD cue — elytra + totem icons to the left of the hotbar.
         EquipHud.register();
         // Presentation: pocket + equip slots ride MenuKit's panel pipeline on
@@ -62,7 +61,7 @@ public class InventoryMaxClient implements ClientModInitializer {
         // Plug Container Locks into IP's client-side lock seam, so IP's unified
         // lock-check / edit UI / icon / sort+move-matching skip recognize placed
         // containers. Client-only: IP's LockedSlots is a client-only class.
-        LockedSlots.registerProvider(new ContainerLockProvider());
+        InventoryPlusApi.registerSlotLockProvider(new ContainerLockProvider());
 
         InventoryMax.LOGGER.info("[inventorymax] Client init — Pocket Cycler + Container Locks active.");
     }

@@ -1,9 +1,9 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevorschoeny.inventoryplus.columncycler.hud.HudMode;
-import com.trevorschoeny.inventoryplus.cyclable.CycleHudRegistry;
-import com.trevorschoeny.inventoryplus.cyclable.CycleHudSource;
-import com.trevorschoeny.inventoryplus.cyclable.CycleView;
+import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
+import com.trevorschoeny.inventorymax.pocket.PocketHudMode;
+import com.trevorschoeny.inventoryplus.api.CycleHudSource;
+import com.trevorschoeny.inventoryplus.api.CycleView;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevlar.menukit.core.Storage;
 
@@ -55,7 +55,7 @@ public final class PocketCyclerHudSource implements CycleHudSource {
 
     /** Register this source with the shared HUD registry. Call at client init. */
     public static void register() {
-        CycleHudRegistry.register(INSTANCE);
+        InventoryPlusApi.registerHudSource(INSTANCE);
     }
 
     /**
@@ -84,7 +84,7 @@ public final class PocketCyclerHudSource implements CycleHudSource {
     @Override
     public CycleView cycleViewForHotbar(int hotbarSlot) {
         if (!IMConfig.pocketCyclerEnabled()) return null;
-        if (IMConfig.pocketHudMode() != HudMode.MINI_HOTBAR) return null;
+        if (IMConfig.pocketHudMode() != PocketHudMode.MINI_HOTBAR) return null;
 
         // Serve the predicted view while it's live, so the animation stays in
         // sync with the drawn arrangement until the server's rotation syncs back.

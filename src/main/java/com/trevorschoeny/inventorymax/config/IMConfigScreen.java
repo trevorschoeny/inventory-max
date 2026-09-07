@@ -1,7 +1,7 @@
 package com.trevorschoeny.inventorymax.config;
 
-import com.trevorschoeny.inventoryplus.columncycler.hud.HudMode;
-import com.trevorschoeny.inventoryplus.config.IPConfig;
+import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
+import com.trevorschoeny.inventorymax.pocket.PocketHudMode;
 
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.LabelOption;
@@ -40,8 +40,8 @@ public final class IMConfigScreen {
                 "Show the mini-hotbar overlay for the pocket cycle when on a pocket slot. "
                         + "Shared with Column Cycler's HUD.",
                 true,
-                () -> IMConfig.pocketHudMode() != HudMode.NONE,
-                v -> IMConfig.setPocketHudMode(v ? HudMode.MINI_HOTBAR : HudMode.NONE));
+                () -> IMConfig.pocketHudMode() != PocketHudMode.NONE,
+                v -> IMConfig.setPocketHudMode(v ? PocketHudMode.MINI_HOTBAR : PocketHudMode.NONE));
 
         // ─── Pocket Cycler (Advanced) ────────────────────────────────────
         Option<Boolean> pocketsSupply = booleanOption(
@@ -99,7 +99,7 @@ public final class IMConfigScreen {
                 .option(pocketHud);
         // Cohabitation flag (per cycle-modes shared rules): running multiple
         // cyclers is allowed — just surface it.
-        if (IPConfig.columnCyclerEnabled()) {
+        if (InventoryPlusApi.isColumnCyclerEnabled()) {
             pocketGroup.option(LabelOption.create(Component.literal(
                     "§7Note: Column Cycler is also enabled. Running multiple cyclers "
                             + "is fine — just be mindful of their separate keybinds.")));

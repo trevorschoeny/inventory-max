@@ -1,8 +1,8 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevorschoeny.inventoryplus.autorestock.AutoRestockSuppression;
-import com.trevorschoeny.inventoryplus.cyclable.CyclerOperation;
-import com.trevorschoeny.inventoryplus.cyclable.HotbarCyclable;
+import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
+import com.trevorschoeny.inventoryplus.api.CyclerOperation;
+import com.trevorschoeny.inventoryplus.api.HotbarCyclable;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevlar.menukit.core.Storage;
 
@@ -163,7 +163,7 @@ public final class PocketCyclable implements HotbarCyclable {
      * why pockets need this and Column Cycler doesn't.)
      */
     private static void rotate(int hotbar, int count, boolean forward, int steps) {
-        AutoRestockSuppression.markExternalChange(hotbar);
+        InventoryPlusApi.suppressRestockFor(hotbar);
         for (int i = 0; i < steps; i++) {
             ClientPlayNetworking.send(new PocketRotateC2S(hotbar, count, forward));
         }

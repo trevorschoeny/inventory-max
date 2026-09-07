@@ -7,7 +7,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
 import com.trevorschoeny.inventorymax.InventoryMax;
-import com.trevorschoeny.inventoryplus.columncycler.hud.HudMode;
+import com.trevorschoeny.inventorymax.pocket.PocketHudMode;
 
 import net.fabricmc.loader.api.FabricLoader;
 
@@ -22,7 +22,7 @@ import java.nio.file.Path;
  *
  * <p>IM owns its own config file + ModMenu entry rather than extending IP's
  * (dependency direction is IM→IP; IM storing state in IP's file would invert
- * ownership). Reuses IP's {@link HudMode} enum for the shared cycle HUD.
+ * ownership). Reuses IP's {@link PocketHudMode} enum for the shared cycle HUD.
  *
  * <p>Per-world pocket counts are NOT here — those live per-world in
  * {@code PocketState} (different layouts per world, same as Column Cycler's
@@ -41,7 +41,7 @@ public final class IMConfig {
     private static boolean pocketCyclerEnabled = true;
     // Shared cycle HUD mode for pockets (None / Mini-hotbar). Default
     // MINI_HOTBAR, matching Column Cycler.
-    private static HudMode pocketHudMode = HudMode.MINI_HOTBAR;
+    private static PocketHudMode pocketHudMode = PocketHudMode.MINI_HOTBAR;
     // Pockets as a search source for IP's Auto-Restock + Auto Tool Switch
     // (the HotbarCyclableRegistry seam). Default ON — matches shipped
     // behavior. OFF = pockets are storage only; nothing gets pulled out
@@ -88,7 +88,7 @@ public final class IMConfig {
             String json = Files.readString(path);
             JsonObject root = JsonParser.parseString(json).getAsJsonObject();
             pocketCyclerEnabled = readBool(root, "pocketCyclerEnabled", pocketCyclerEnabled);
-            pocketHudMode = HudMode.fromName(readString(root, "pocketHudMode", null), pocketHudMode);
+            pocketHudMode = PocketHudMode.fromName(readString(root, "pocketHudMode", null), pocketHudMode);
             pocketsSupplyAutomation = readBool(root, "pocketsSupplyAutomation", pocketsSupplyAutomation);
             equipmentSlotsEnabled = readBool(root, "equipmentSlotsEnabled", equipmentSlotsEnabled);
             equipmentHudCue = readBool(root, "equipmentHudCue", equipmentHudCue);
@@ -132,8 +132,8 @@ public final class IMConfig {
     public static boolean pocketCyclerEnabled() { return pocketCyclerEnabled; }
     public static void setPocketCyclerEnabled(boolean v) { pocketCyclerEnabled = v; save(); }
 
-    public static HudMode pocketHudMode() { return pocketHudMode; }
-    public static void setPocketHudMode(HudMode v) { pocketHudMode = v; save(); }
+    public static PocketHudMode pocketHudMode() { return pocketHudMode; }
+    public static void setPocketHudMode(PocketHudMode v) { pocketHudMode = v; save(); }
 
     public static boolean pocketsSupplyAutomation() { return pocketsSupplyAutomation; }
     public static void setPocketsSupplyAutomation(boolean v) { pocketsSupplyAutomation = v; save(); }

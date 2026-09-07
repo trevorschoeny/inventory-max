@@ -1,8 +1,7 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevorschoeny.inventoryplus.autorestock.AutoRestockSuppression;
-import com.trevorschoeny.inventoryplus.cyclable.CycleHudRegistry;
-import com.trevorschoeny.inventoryplus.cyclable.CyclerDirection;
+import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
+import com.trevorschoeny.inventoryplus.api.CyclerDirection;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.config.IMKeybinds;
 
@@ -73,13 +72,13 @@ public final class PocketInput {
         // Tell Auto-Restock this is a deliberate hand-item change — otherwise a
         // wrap to an empty pocket reads as "held item ran out" and it switches
         // the selected slot to a backup stack.
-        AutoRestockSuppression.markExternalChange(hotbar);
+        InventoryPlusApi.suppressRestockFor(hotbar);
         ClientPlayNetworking.send(new PocketRotateC2S(hotbar, count, forward));
         // Predict the rotation locally so the HUD animation is drawn against the
         // post-rotation arrangement (the rotation is server-authoritative and
         // arrives a round-trip later — without this the animation desyncs).
         PocketCyclerHudSource.predictRotation(hotbar, forward);
-        CycleHudRegistry.fireCycleAnimation(PocketCyclerHudSource.INSTANCE,
+        InventoryPlusApi.playCycleAnimation(PocketCyclerHudSource.INSTANCE,
                 hotbar, forward ? CyclerDirection.FORWARD : CyclerDirection.BACKWARD);
     }
 }

@@ -40,7 +40,7 @@ public class InventoryMax implements ModInitializer {
         // calls it too). The server-read toggles (inventory mending, equipment
         // behaviors, container-lock enforcement) otherwise silently fall to
         // defaults on a dedicated server. Server-safe: IMConfig's only IP
-        // type is HudMode, a plain enum.
+        // type is PocketHudMode, a plain enum.
         IMConfig.load();
 
         // Register the SHARED container-lock channel (§0049). Universal, and

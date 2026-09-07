@@ -1,12 +1,9 @@
 package com.trevorschoeny.inventorymax.equipment;
 
+import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 
-import com.trevorschoeny.inventoryplus.autorestock.AutoRestockSearch;
-import com.trevorschoeny.inventoryplus.config.IPConfig;
-import com.trevorschoeny.inventoryplus.cyclable.HotbarCyclable.ExtraSlot;
-import com.trevorschoeny.inventoryplus.cyclable.HotbarCyclableRegistry;
-import com.trevorschoeny.inventoryplus.lockeditems.LockedItemUser;
+import com.trevorschoeny.inventoryplus.api.HotbarCyclable.ExtraSlot;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -49,6 +46,10 @@ public final class EquipAutoRestock {
     }
 
     /** InventoryMenu maps inventory hotbar slots 0–8 to menu slots 36–44. */
+    /** Vanilla: container slots 0-8 are the hotbar, the main grid starts at 9. Vanilla's
+     *  inventory model, not Inventory Plus's, so Inventory Max states it itself. */
+    private static final int MAIN_INV_START = 9;
+
     private static final int HOTBAR_MENU_OFFSET = 36;
 
     /** Whether the totem slot held a totem last tick — to catch the consume transition. */
@@ -69,30 +70,29 @@ public final class EquipAutoRestock {
         if (!justConsumed) return;                // only the full→empty transition
         if (mc.gui.screen() != null) return;            // gameplay only — not while editing the inventory
         if (!IMConfig.equipmentSlotsEnabled()) return; // feature off → no totem restock
-        if (!IPConfig.autoRestockItem()) return;  // follow the auto-restock toggle
+        if (!InventoryPlusApi.isItemRestockEnabled()) return;  // follow the auto-restock toggle
 
         Inventory inv = player.getInventory();
         // A backup totem may live in a pocket too — outside the 0–35 model — so
         // include the cyclers' extra slots in the search.
-        List<ExtraSlot> extras = HotbarCyclableRegistry.extraSearchSlots(player);
+        List<ExtraSlot> extras = InventoryPlusApi.extraSearchSlots(player);
         // Same bucket IP refills the offhand under (see class doc) — the totem
         // is a non-damageable item, so this follows Item Restock's locked-item
         // setting, per IP 1.4.0's Locked Items (Trev, 2026-09-06).
-        int source = AutoRestockSearch.findSource(
-                inv, totemProbe(), AutoRestockSearch.NONE, extras, LockedItemUser.RESTOCK_ITEM);
-        if (source == AutoRestockSearch.NONE) return;
+        int source = InventoryPlusApi.findRestockSource(inv, totemProbe(), extras);
+        if (source == InventoryPlusApi.NO_SOURCE) return;
 
         // A pocket source can't be shift-clicked client-side in-world (the pocket
         // slot is inert), so route it through the cycler, which performs the move
         // server-side (the totem lands in the equip slot via the same quick-move
         // routing). Returns false for an ordinary 0–35 source — fall through to
         // the normal client-side quick-move.
-        if (HotbarCyclableRegistry.quickMoveOut(source)) return;
+        if (InventoryPlusApi.quickMoveOut(source)) return;
 
         // Inventory source: convert a hotbar slot (0–8) to its InventoryMenu slot,
         // then shift-click it — our quick-move routing drops the totem into the
         // (now-empty) equip totem slot.
-        int menuSlot = source < AutoRestockSearch.MAIN_INV_START ? source + HOTBAR_MENU_OFFSET : source;
+        int menuSlot = source < MAIN_INV_START ? source + HOTBAR_MENU_OFFSET : source;
         gameMode.handleContainerInput(
                 player.inventoryMenu.containerId, menuSlot, 0, ContainerInput.QUICK_MOVE, player);
     }

@@ -1,5 +1,6 @@
 package com.trevorschoeny.inventorymax.pocket;
 
+import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -7,7 +8,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
-import com.trevorschoeny.inventoryplus.lockedslots.WorldIdentity;
 import com.trevorschoeny.inventorymax.InventoryMax;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -81,7 +81,7 @@ public final class PocketState {
 
     /** Counts for the current world (created on demand). Null if no world id. */
     private static int[] current() {
-        String id = WorldIdentity.current(Minecraft.getInstance());
+        String id = InventoryPlusApi.worldId();
         if (id == null) return null;
         return PER_WORLD.computeIfAbsent(id, k -> new int[Pockets.HOTBAR_SLOTS]);
     }
