@@ -4,6 +4,7 @@ import com.trevorschoeny.inventorymax.pocket.PocketHoverState;
 import com.trevorschoeny.inventorymax.pocket.Pockets;
 import com.trevorschoeny.inventorymax.pocket.SliceStorage;
 import com.trevlar.menukit.core.MKCSlots;
+import com.trevlar.menukit.core.SlotGroupCategory;
 import com.trevlar.menukit.core.Storage;
 
 import net.minecraft.world.entity.player.Inventory;
@@ -50,6 +51,11 @@ public abstract class InventoryMenuPocketMixin {
                 MKCSlots.onto(menu, player)
                         .panel("inventorymax:" + Pockets.groupId(n, d))
                         .group(Pockets.groupId(n, d))
+                        // Pockets ARE general player storage: a feature searching the
+                        // player's inventory should find a stack in a pocket the same
+                        // way it finds one in the main grid. Unlike the equipment slots,
+                        // which get their own categories precisely so searches skip them.
+                        .category(SlotGroupCategory.PLAYER_INVENTORY)
                         .storage(slice)
                         .layout(Pockets.pocketX(n), Pockets.pocketY(d), 1)
                         // Server-safe predicate (no client imports); only

@@ -1,6 +1,7 @@
 package com.trevorschoeny.inventorymax.equipment;
 
 import com.trevlar.menukit.core.CreatedSlotAdapter;
+import com.trevlar.menukit.core.SlotGroupCategory;
 import com.trevlar.menukit.core.GatingContext;
 import com.trevlar.menukit.core.MKCBehaviorKeys;
 import com.trevlar.menukit.core.SlotGate;
@@ -47,6 +48,20 @@ import java.util.function.Predicate;
  * protocol. Declared at common init, bound by the slot mixin.
  */
 public final class EquipmentSlots {
+
+    /**
+     * What the equipment slots ARE, in MenuKit's category vocabulary (MKC 5.0.0).
+     *
+     * <p>Deliberately NOT {@code PLAYER_INVENTORY}. These are dedicated gear slots,
+     * not general storage: a feature searching the player's inventory for a stack to
+     * restock from, or a firework to fire, must not treat the elytra a player is
+     * flying on as a spare item. Their own categories let those searches skip them
+     * while a feature that specifically wants "the equipment elytra" can still ask.
+     */
+    public static final SlotGroupCategory EQUIPMENT_ELYTRA =
+            new SlotGroupCategory("inventorymax", "equipment_elytra");
+    public static final SlotGroupCategory EQUIPMENT_TOTEM =
+            new SlotGroupCategory("inventorymax", "equipment_totem");
 
     private EquipmentSlots() {}
 
