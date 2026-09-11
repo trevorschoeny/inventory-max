@@ -1,6 +1,8 @@
 package com.trevorschoeny.inventorymax;
 
 import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
+import com.trevorschoeny.inventoryplus.api.InventoryPlusOperations;
+import com.trevorschoeny.inventorymax.operations.ServedOperation;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.config.IMKeybinds;
 import com.trevorschoeny.inventorymax.containerlocks.ContainerLockProvider;
@@ -34,6 +36,12 @@ public class InventoryMaxClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         IMConfig.load();
+        // The server names three of Inventory Plus's operations without loading
+        // Inventory Plus, which is client-only (see ServedOperation). Here both
+        // mods are loaded, so check the copies equal the published keys and fail
+        // at startup, not silently, if Inventory Plus ever changes one.
+        ServedOperation.verifyMirrors(InventoryPlusOperations.RESTOCK_TAKE,
+                InventoryPlusOperations.RESTOCK_PUT, InventoryPlusOperations.AUTO_TOOL_SWITCH);
         IMKeybinds.register();
         PocketState.load();
         PocketInput.register();

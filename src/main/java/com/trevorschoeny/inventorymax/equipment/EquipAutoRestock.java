@@ -2,6 +2,11 @@ package com.trevorschoeny.inventorymax.equipment;
 
 import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
 import com.trevorschoeny.inventoryplus.api.PlayerMenuSlots;
+import com.trevorschoeny.inventoryplus.api.InventoryPlusOperations;
+import com.trevlar.menukit.core.MKCSlot;
+import com.trevlar.menukit.window.SlotOperations;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 
 import com.trevorschoeny.inventoryplus.api.HotbarCyclable.ExtraSlot;
@@ -75,13 +80,17 @@ public final class EquipAutoRestock {
         // setting, per IP 1.4.0's Locked Items (Trev, 2026-09-06).
         int source = InventoryPlusApi.findRestockSource(inv, totemProbe(), extras);
         if (source == InventoryPlusApi.NO_SOURCE) return;
+        // The totem slot is the one being refilled; asked before either path. The
+        // source was screened for restock-take by Inventory Plus's search.
+        if (!totemSlotAllowsRestock(player)) return;
 
         // A pocket source can't be shift-clicked client-side in-world (the pocket
         // slot is inert), so route it through the cycler, which performs the move
         // server-side (the totem lands in the equip slot via the same quick-move
         // routing). Returns false for an ordinary 0–35 source — fall through to
         // the normal client-side quick-move.
-        if (InventoryPlusApi.quickMoveOut(source)) return;
+        if (InventoryPlusApi.quickMoveOut(source,
+                InventoryPlusOperations.RESTOCK_TAKE, InventoryPlusOperations.RESTOCK_PUT)) return;
 
         // Inventory source: the search returns a container index and the
         // shift-click names a menu slot, so convert through Inventory Plus's one
@@ -89,7 +98,20 @@ public final class EquipAutoRestock {
         // Our quick-move routing drops the totem into the now-empty totem slot.
         int menuSlot = PlayerMenuSlots.menuIndexOf(player.inventoryMenu, player, source);
         if (menuSlot < 0) return;
-        gameMode.handleContainerInput(
-                player.inventoryMenu.containerId, menuSlot, 0, ContainerInput.QUICK_MOVE, player);
+        // A shift-click, judged as a restock rather than as the shift-click it is.
+        SlotOperations.as(InventoryPlusOperations.RESTOCK_TAKE, InventoryPlusOperations.RESTOCK_PUT,
+                () -> gameMode.handleContainerInput(
+                        player.inventoryMenu.containerId, menuSlot, 0, ContainerInput.QUICK_MOVE, player));
+    }
+
+    /** Whether restock may fill the equipment totem slot on the player's inventory menu. */
+    private static boolean totemSlotAllowsRestock(LocalPlayer player) {
+        AbstractContainerMenu menu = player.inventoryMenu;
+        for (Slot s : menu.slots) {
+            if (s instanceof MKCSlot mk && EquipmentSlots.TOTEM_GROUP.equals(mk.getGroupId())) {
+                return SlotOperations.allows(menu, s, player, InventoryPlusOperations.RESTOCK_PUT);
+            }
+        }
+        return false; // no totem slot on the menu: nothing to refill
     }
 }

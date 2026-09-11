@@ -50,7 +50,7 @@ public abstract class InventoryMenuEquipmentMixin {
 
         // Elytra slot (top) — accepts only elytra, one item.
         MKCSlots.onto(menu, player)
-                .panel(EquipmentSlots.MOD_ID + ":" + EquipmentSlots.ELYTRA_GROUP)
+                .panel(EquipmentSlots.panelId(EquipmentSlots.ELYTRA_GROUP))
                 .group(EquipmentSlots.ELYTRA_GROUP)
                 .category(EquipmentSlots.EQUIPMENT_ELYTRA)
                 .storage(new SliceStorage(backing, EquipmentSlots.ELYTRA_INDEX, 1, player))
@@ -63,7 +63,7 @@ public abstract class InventoryMenuEquipmentMixin {
 
         // Totem slot (bottom, just above the offhand) — accepts only totems, one item.
         MKCSlots.onto(menu, player)
-                .panel(EquipmentSlots.MOD_ID + ":" + EquipmentSlots.TOTEM_GROUP)
+                .panel(EquipmentSlots.panelId(EquipmentSlots.TOTEM_GROUP))
                 .group(EquipmentSlots.TOTEM_GROUP)
                 .category(EquipmentSlots.EQUIPMENT_TOTEM)
                 .storage(new SliceStorage(backing, EquipmentSlots.TOTEM_INDEX, 1, player))

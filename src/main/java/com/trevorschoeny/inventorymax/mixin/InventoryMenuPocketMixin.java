@@ -49,7 +49,7 @@ public abstract class InventoryMenuPocketMixin {
                 Storage slice = new SliceStorage(
                         backing, Pockets.flatIndex(n, d), 1, player);
                 MKCSlots.onto(menu, player)
-                        .panel("inventorymax:" + Pockets.groupId(n, d))
+                        .panel(Pockets.panelId(n, d))
                         .group(Pockets.groupId(n, d))
                         // Pockets ARE general player storage: a feature searching the
                         // player's inventory should find a stack in a pocket the same

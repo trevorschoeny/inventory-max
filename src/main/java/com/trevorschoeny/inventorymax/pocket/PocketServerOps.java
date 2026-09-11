@@ -1,7 +1,9 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevlar.menukit.core.MKCSlot;
 import com.trevlar.menukit.core.Storage;
+import com.trevlar.menukit.window.SlotOperations;
+
+import com.trevorschoeny.inventorymax.operations.ServedOperation;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -22,10 +24,15 @@ public final class PocketServerOps {
      * FORWARD brings pocket 0 into the hand and wraps the hand's item to the
      * topmost pocket; BACKWARD is the mirror.
      */
-    public static void rotate(ServerPlayer sp, int hotbar, int count, boolean forward) {
+    public static void rotate(ServerPlayer sp, int hotbar, int count, boolean forward, ServedOperation op) {
         if (sp == null || hotbar < 0 || hotbar >= Pockets.HOTBAR_SLOTS) return;
         count = Math.max(0, Math.min(Pockets.MAX_PER_SLOT, count));
         if (count < 1) return; // need ≥2 ring members (1 pocket + hotbar)
+        // Asked again here, for the operation the packet names. The client asked
+        // before sending, but Inventory Plus's locks live on the client and a
+        // dedicated server has no Inventory Plus, so the server's answer is the
+        // one that holds for everyone else's vetoes.
+        if (!PocketRing.rotationAllowed(sp.inventoryMenu, sp, hotbar, count, op.take(), op.put())) return;
 
         Storage pockets = Pockets.POCKETS.bind(sp);
         int m = count + 1;
@@ -63,30 +70,26 @@ public final class PocketServerOps {
      * <p>No-op when the pocket slot can't be found (slot absent) — the move
      * simply doesn't happen, same failure mode as a missing replacement.
      */
-    public static void quickMove(ServerPlayer sp, int hotbar, int depth) {
+    public static void quickMove(ServerPlayer sp, int hotbar, int depth, ServedOperation op) {
         if (sp == null || hotbar < 0 || hotbar >= Pockets.HOTBAR_SLOTS) return;
         if (depth < 0 || depth >= Pockets.MAX_PER_SLOT) return;
         AbstractContainerMenu menu = sp.inventoryMenu;
-        int idx = findPocketSlotIndex(menu, hotbar, depth);
+        int idx = PocketRing.pocketMenuIndex(menu, hotbar, depth);
         if (idx < 0) return;
-        menu.quickMoveStack(sp, idx);
+        // The pocket being emptied is asked here explicitly: this path never goes
+        // through doClick, so no seam judges the source.
+        if (!PocketRing.takeAllowed(menu, sp, hotbar, depth, op.take())) return;
+        // The destination is judged inside the quick-move, by MenuKit's
+        // shift-click-in seams in moveItemStackTo. Run under the served operation
+        // so those seams judge it as that (a restock, in practice) rather than as
+        // a shift-click. The tag is a thread-local set on this, the server thread,
+        // and the quick-move runs synchronously on it, so the seams see it; Inventory
+        // Max's own totem routing reaches moveItemStackTo through an invoker, which
+        // still runs those seams.
+        SlotOperations.as(op.take(), op.put(), () -> menu.quickMoveStack(sp, idx));
         menu.broadcastChanges();
     }
 
-    /**
-     * Menu-slot index of the pocket slot for {@code (hotbar, depth)} in
-     * {@code menu}, matched by its MenuKit group id, or {@code -1} if absent.
-     * Mirrors {@code InventoryMenuQuickMoveMixin}'s slot-slot lookup.
-     */
-    private static int findPocketSlotIndex(AbstractContainerMenu menu, int hotbar, int depth) {
-        String groupId = Pockets.groupId(hotbar, depth);
-        for (int k = 0; k < menu.slots.size(); k++) {
-            if (menu.slots.get(k) instanceof MKCSlot mk && groupId.equals(mk.getGroupId())) {
-                return k;
-            }
-        }
-        return -1;
-    }
 
     /**
      * Empty pocket depths {@code [from, to)} of {@code hotbar} into the

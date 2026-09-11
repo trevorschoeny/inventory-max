@@ -4,6 +4,8 @@ import com.trevlar.menukit.core.CreatedSlotAdapter;
 import com.trevlar.menukit.core.SlotGroupCategory;
 import com.trevlar.menukit.core.GatingContext;
 import com.trevlar.menukit.core.MKCBehaviorKeys;
+import com.trevlar.menukit.core.MKCSlots;
+import com.trevlar.menukit.inject.SlotGroups;
 import com.trevlar.menukit.core.SlotGate;
 import com.trevlar.menukit.core.Storage;
 import com.trevlar.menukit.core.StorageAttachment;
@@ -117,6 +119,24 @@ public final class EquipmentSlots {
      * (accept-filter + single-item cap), Curse-of-Binding (BINDING), and XP
      * mending (MENDING). Idempotent.
      */
+    /**
+     * The panel id an equipment slot is registered under. One source for the
+     * creation mixin, the behavior declarations and the group declarations.
+     */
+    public static String panelId(String group) {
+        return MOD_ID + ":" + group;
+    }
+
+    /**
+     * Declares the elytra and totem groups with MenuKit at common init, each in its
+     * own category and in no set, so a settings screen lists "Elytra slot" and
+     * "Totem slot". Idempotent.
+     */
+    public static void declareGroups() {
+        SlotGroups.declare(MKCSlots.groupId(panelId(ELYTRA_GROUP), ELYTRA_GROUP), EQUIPMENT_ELYTRA);
+        SlotGroups.declare(MKCSlots.groupId(panelId(TOTEM_GROUP), TOTEM_GROUP), EQUIPMENT_TOTEM);
+    }
+
     public static void declareSlotBehavior() {
         declare(ELYTRA_GROUP, EquipmentSlots::isElytra);
         declare(TOTEM_GROUP, EquipmentSlots::isTotem);
@@ -124,7 +144,7 @@ public final class EquipmentSlots {
 
     /** GATING (filter + single item) + BINDING + MENDING on the group's one slot, by address. */
     private static void declare(String group, Predicate<ItemStack> accepts) {
-        Address a = CreatedSlotAdapter.addressOf(MOD_ID + ":" + group, group, 0);
+        Address a = CreatedSlotAdapter.addressOf(panelId(group), group, 0);
         Window.slot(a).set(MKCBehaviorKeys.GATING, new SlotGate() {
             @Override public boolean mayPlace(ItemStack stack, GatingContext ctx) { return accepts.test(stack); }
             @Override public boolean mayPickup(Player player, GatingContext ctx) { return true; }
