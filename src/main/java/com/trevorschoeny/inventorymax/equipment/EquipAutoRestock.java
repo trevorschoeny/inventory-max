@@ -1,6 +1,7 @@
 package com.trevorschoeny.inventorymax.equipment;
 
 import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
+import com.trevorschoeny.inventoryplus.api.PlayerMenuSlots;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 
 import com.trevorschoeny.inventoryplus.api.HotbarCyclable.ExtraSlot;
@@ -45,13 +46,6 @@ public final class EquipAutoRestock {
         return totemProbe;
     }
 
-    /** InventoryMenu maps inventory hotbar slots 0–8 to menu slots 36–44. */
-    /** Vanilla: container slots 0-8 are the hotbar, the main grid starts at 9. Vanilla's
-     *  inventory model, not Inventory Plus's, so Inventory Max states it itself. */
-    private static final int MAIN_INV_START = 9;
-
-    private static final int HOTBAR_MENU_OFFSET = 36;
-
     /** Whether the totem slot held a totem last tick — to catch the consume transition. */
     private static boolean totemSlotFilled = false;
 
@@ -89,10 +83,12 @@ public final class EquipAutoRestock {
         // the normal client-side quick-move.
         if (InventoryPlusApi.quickMoveOut(source)) return;
 
-        // Inventory source: convert a hotbar slot (0–8) to its InventoryMenu slot,
-        // then shift-click it — our quick-move routing drops the totem into the
-        // (now-empty) equip totem slot.
-        int menuSlot = source < MAIN_INV_START ? source + HOTBAR_MENU_OFFSET : source;
+        // Inventory source: the search returns a container index and the
+        // shift-click names a menu slot, so convert through Inventory Plus's one
+        // conversion (the same one its own restock uses), then shift-click it.
+        // Our quick-move routing drops the totem into the now-empty totem slot.
+        int menuSlot = PlayerMenuSlots.menuIndexOf(player.inventoryMenu, player, source);
+        if (menuSlot < 0) return;
         gameMode.handleContainerInput(
                 player.inventoryMenu.containerId, menuSlot, 0, ContainerInput.QUICK_MOVE, player);
     }
