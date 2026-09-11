@@ -74,7 +74,11 @@ public final class EquipAutoRestock {
         Inventory inv = player.getInventory();
         // A backup totem may live in a pocket too — outside the 0–35 model — so
         // include the cyclers' extra slots in the search.
-        List<ExtraSlot> extras = InventoryPlusApi.extraSearchSlots(player);
+        // Only pockets that would let a restock quick-move the totem out are
+        // offered, so a refused pocket is passed over rather than chosen and
+        // then refused (Inventory Plus 1.7.0's extraSlotsToQuickMove).
+        List<ExtraSlot> extras = InventoryPlusApi.extraSlotsToQuickMove(player,
+                InventoryPlusOperations.RESTOCK_TAKE, InventoryPlusOperations.RESTOCK_PUT);
         // Same bucket IP refills the offhand under (see class doc) — the totem
         // is a non-damageable item, so this follows Item Restock's locked-item
         // setting, per IP 1.4.0's Locked Items (Trev, 2026-09-06).

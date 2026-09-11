@@ -146,11 +146,9 @@ public final class PocketCyclable implements HotbarCyclable {
         boolean forward = fwdSteps <= bwdSteps;
         int steps = Math.min(fwdSteps, bwdSteps);
         if (steps <= 0) return CyclerOperation.NO_OP;
-        Player player = Minecraft.getInstance().player;
-        if (player == null
-                || !PocketRing.rotationAllowed(player.inventoryMenu, player, hotbar, count, take, put)) {
-            return CyclerOperation.NO_OP;
-        }
+        // The same judgement Inventory Plus asks before choosing this pocket as a
+        // source, so a pocket it chose is one this bring will run for.
+        if (!allowsBringToHotbar(slot, take, put)) return CyclerOperation.NO_OP;
         ServedOperation op = ServedOperation.servingFor(take, put);
         rotate(hotbar, count, forward, steps, op);
         // Undo: same step count, opposite direction. Capture the parameters so
@@ -177,9 +175,7 @@ public final class PocketCyclable implements HotbarCyclable {
     public boolean quickMoveOut(int slot, BehaviorKey<TriBool> take, BehaviorKey<TriBool> put) {
         // Same claim check as bringToHotbar — only our revealed pockets.
         if (hotbarPositionOf(slot) == -1) return false;
-        Player player = Minecraft.getInstance().player;
-        if (player == null
-                || !PocketRing.takeAllowed(player.inventoryMenu, player, hotbarOf(slot), depthOf(slot), take)) {
+        if (!allowsQuickMoveOut(slot, take, put)) {
             // Ours, and refused. True, not false: false would tell the caller to
             // click this pocket id as an ordinary inventory slot.
             return true;
@@ -193,6 +189,38 @@ public final class PocketCyclable implements HotbarCyclable {
         ClientPlayNetworking.send(new PocketQuickMoveC2S(hotbarOf(slot), depthOf(slot),
                 ServedOperation.servingFor(take, put)));
         return true;
+    }
+
+    /**
+     * Whether bringing this pocket down as {@code take}/{@code put} would run:
+     * every slot in its hotbar column's ring, the hotbar slot included, allows
+     * both, which is {@link PocketRing#rotationAllowed}. Inventory Plus asks
+     * this while it chooses a source for a restock or a tool switch, so a
+     * pocket that would refuse is passed over instead of chosen and then
+     * silently not moved. {@link #bringToHotbar} applies the same answer.
+     */
+    @Override
+    public boolean allowsBringToHotbar(int slot, BehaviorKey<TriBool> take, BehaviorKey<TriBool> put) {
+        if (hotbarPositionOf(slot) == -1) return false;
+        Player player = Minecraft.getInstance().player;
+        int hotbar = hotbarOf(slot);
+        return player != null && PocketRing.rotationAllowed(
+                player.inventoryMenu, player, hotbar, PocketState.count(hotbar), take, put);
+    }
+
+    /**
+     * Whether quick-moving this pocket out as {@code take}/{@code put} would
+     * run: the pocket allows {@code take}, which is
+     * {@link PocketRing#takeAllowed}. Where the item lands is judged on the
+     * server inside the move, so {@code put} is not asked here.
+     * {@link #quickMoveOut} applies the same answer.
+     */
+    @Override
+    public boolean allowsQuickMoveOut(int slot, BehaviorKey<TriBool> take, BehaviorKey<TriBool> put) {
+        if (hotbarPositionOf(slot) == -1) return false;
+        Player player = Minecraft.getInstance().player;
+        return player != null && PocketRing.takeAllowed(
+                player.inventoryMenu, player, hotbarOf(slot), depthOf(slot), take);
     }
 
     /**
