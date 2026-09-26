@@ -4,6 +4,7 @@ import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.containerlocks.ContainerLocks;
 import com.trevorschoeny.inventorymax.equipment.EquipmentSlots;
 import com.trevorschoeny.inventorymax.mending.InventoryMendingProvider;
+import com.trevorschoeny.inventorymax.operations.InventoryMaxOperations;
 import com.trevorschoeny.inventorymax.pocket.PocketEvictC2S;
 import com.trevorschoeny.inventorymax.pocket.PocketQuickMoveC2S;
 import com.trevorschoeny.inventorymax.pocket.PocketRotateC2S;
@@ -63,6 +64,14 @@ public class InventoryMax implements ModInitializer {
         // and totem slots get accept-filter GATING + Curse-of-Binding + MENDING.
         Pockets.declareSlotBehavior();
         EquipmentSlots.declareSlotBehavior();
+        // Slot operations and slot groups (plans/slot-operations.md). Pocket
+        // Cycler is defined so MenuKit lists it and a lock can refuse it; the
+        // groups are declared here rather than left to MenuKit: Containers, which
+        // declares a group only when the first inventory menu is built, so they
+        // are listed from the title screen. The 27 pockets are one "Pockets" set.
+        InventoryMaxOperations.define();
+        Pockets.declareGroups();
+        EquipmentSlots.declareGroups();
 
         // C2S payload types — registered on both sides (the codec must be
         // known wherever the payload travels).
@@ -77,7 +86,7 @@ public class InventoryMax implements ModInitializer {
             MinecraftServer server = sp.level().getServer();
             if (server != null) {
                 server.execute(() -> PocketServerOps.rotate(
-                        sp, payload.hotbar(), payload.count(), payload.forward()));
+                        sp, payload.hotbar(), payload.count(), payload.forward(), payload.op()));
             }
         });
         ServerPlayNetworking.registerGlobalReceiver(PocketEvictC2S.TYPE, (payload, context) -> {
@@ -93,7 +102,7 @@ public class InventoryMax implements ModInitializer {
             MinecraftServer server = sp.level().getServer();
             if (server != null) {
                 server.execute(() -> PocketServerOps.quickMove(
-                        sp, payload.hotbar(), payload.depth()));
+                        sp, payload.hotbar(), payload.depth(), payload.op()));
             }
         });
 

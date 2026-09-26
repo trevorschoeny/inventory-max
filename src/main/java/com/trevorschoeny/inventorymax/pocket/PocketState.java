@@ -1,6 +1,6 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
+import com.trevorschoeny.inventoryplus.api.WorldStore;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -19,6 +19,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Collections;
+import java.util.ArrayList;
 
 /**
  * Client-side, per-world pocket <b>count</b> state: how many pockets (0–3) are
@@ -41,8 +44,22 @@ public final class PocketState {
     private static final int CURRENT_VERSION = 1;
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    /** worldId → int[9] counts. */
-    private static final Map<String, int[]> PER_WORLD = new HashMap<>();
+    /** Nine zeros: no pockets on any hotbar slot. The store's "nothing stored" value. */
+    private static final List<Integer> NO_POCKETS = Collections.nCopies(Pockets.HOTBAR_SLOTS, 0);
+
+    /**
+     * Pocket count (0-3) for each of the 9 hotbar slots, per world. Inventory
+     * Plus's {@link WorldStore}: an immutable list per world, read without
+     * creating anything, saved only when a count actually changes. A world
+     * with no pockets anywhere is not stored at all, which is what the old
+     * "skip all-zero worlds" check in save() was reaching for.
+     *
+     * <p>Before this, {@code count(hotbar)} was a read that created an entry,
+     * so rendering the pocket HUD wrote a nine-zero array for the current
+     * world every frame, and the array itself was mutated in place.
+     */
+    private static final WorldStore<List<Integer>> COUNTS =
+            WorldStore.of(NO_POCKETS, List::copyOf, PocketState::save);
     private static boolean loaded = false;
 
     private static Path filePath() {
@@ -58,18 +75,20 @@ public final class PocketState {
         try {
             JsonObject root = JsonParser.parseString(Files.readString(path)).getAsJsonObject();
             JsonObject perWorld = root.has("perWorld") ? root.getAsJsonObject("perWorld") : new JsonObject();
+            int worlds = 0;
             for (var e : perWorld.entrySet()) {
                 JsonObject w = e.getValue().getAsJsonObject();
-                int[] counts = new int[Pockets.HOTBAR_SLOTS];
+                List<Integer> counts = new ArrayList<>(NO_POCKETS);
                 if (w.has("counts")) {
                     JsonArray arr = w.getAsJsonArray("counts");
                     for (int i = 0; i < Pockets.HOTBAR_SLOTS && i < arr.size(); i++) {
-                        counts[i] = clamp(arr.get(i).getAsInt());
+                        counts.set(i, clamp(arr.get(i).getAsInt()));
                     }
                 }
-                PER_WORLD.put(e.getKey(), counts);
+                COUNTS.load(e.getKey(), counts);
+                if (!NO_POCKETS.equals(counts)) worlds++;
             }
-            InventoryMax.LOGGER.info("[pockets] loaded counts for {} world(s)", PER_WORLD.size());
+            InventoryMax.LOGGER.info("[pockets] loaded counts for {} world(s)", worlds);
         } catch (IOException | JsonSyntaxException | IllegalStateException ex) {
             InventoryMax.LOGGER.error("[pockets] failed to read {} — starting empty", path, ex);
         }
@@ -79,25 +98,20 @@ public final class PocketState {
         return Math.max(0, Math.min(Pockets.MAX_PER_SLOT, c));
     }
 
-    /** Counts for the current world (created on demand). Null if no world id. */
-    private static int[] current() {
-        String id = InventoryPlusApi.worldId();
-        if (id == null) return null;
-        return PER_WORLD.computeIfAbsent(id, k -> new int[Pockets.HOTBAR_SLOTS]);
-    }
-
     public static int count(int hotbar) {
         if (hotbar < 0 || hotbar >= Pockets.HOTBAR_SLOTS) return 0;
-        int[] c = current();
-        return c == null ? 0 : c[hotbar];
+        return COUNTS.get().get(hotbar);   // a read: never creates an entry
     }
 
     private static void setCount(int hotbar, int value) {
-        int[] c = current();
-        if (c == null) return;
-        c[hotbar] = clamp(value);
-        save();
-        PocketHoverState.setCount(hotbar, c[hotbar]);
+        int clamped = clamp(value);
+        COUNTS.modify(counts -> {
+            List<Integer> next = new ArrayList<>(counts);
+            next.set(hotbar, clamped);
+            return next;
+        });
+        // Push what the store now holds, so the hover state can never disagree with it.
+        PocketHoverState.setCount(hotbar, count(hotbar));
     }
 
     /** Grow a pocket panel (+1, capped at 3). At 0 this is the "attach". */
@@ -122,10 +136,9 @@ public final class PocketState {
 
     /** Push every hotbar slot's count into the server-safe hover state. */
     public static void pushAll() {
-        int[] c = current();
-        if (c == null) return;
+        List<Integer> counts = COUNTS.get();
         for (int n = 0; n < Pockets.HOTBAR_SLOTS; n++) {
-            PocketHoverState.setCount(n, c[n]);
+            PocketHoverState.setCount(n, counts.get(n));
         }
     }
 
@@ -136,19 +149,14 @@ public final class PocketState {
             JsonObject root = new JsonObject();
             root.addProperty("version", CURRENT_VERSION);
             JsonObject perWorld = new JsonObject();
-            for (var e : PER_WORLD.entrySet()) {
-                int[] counts = e.getValue();
-                boolean anyNonZero = false;
+            // The store never holds an all-zero world, so every world it visits is written.
+            COUNTS.forEachWorld((worldId, counts) -> {
                 JsonArray arr = new JsonArray();
-                for (int v : counts) {
-                    arr.add(v);
-                    if (v != 0) anyNonZero = true;
-                }
-                if (!anyNonZero) continue;
+                counts.forEach(arr::add);
                 JsonObject w = new JsonObject();
                 w.add("counts", arr);
-                perWorld.add(e.getKey(), w);
-            }
+                perWorld.add(worldId, w);
+            });
             root.add("perWorld", perWorld);
             Files.writeString(path, GSON.toJson(root));
         } catch (IOException ex) {

@@ -1,6 +1,10 @@
 package com.trevorschoeny.inventorymax.pocket;
 
 import com.trevlar.menukit.core.CreatedSlotAdapter;
+import com.trevlar.menukit.core.MKCSlots;
+import com.trevlar.menukit.core.SlotGroupCategory;
+import com.trevlar.menukit.inject.SlotGroupSet;
+import com.trevlar.menukit.inject.SlotGroups;
 import com.trevlar.menukit.core.MKCBehaviorKeys;
 import com.trevlar.menukit.core.StorageAttachment;
 import com.trevlar.menukit.window.TriBool;
@@ -80,7 +84,7 @@ public final class Pockets {
         for (int n = 0; n < HOTBAR_SLOTS; n++) {
             for (int d = 0; d < MAX_PER_SLOT; d++) {
                 String g = groupId(n, d);
-                Window.slot(CreatedSlotAdapter.addressOf(MOD_ID + ":" + g, g, 0))
+                Window.slot(CreatedSlotAdapter.addressOf(panelId(n, d), g, 0))
                         .set(MKCBehaviorKeys.MENDING, TriBool.TRUE);
             }
         }
@@ -94,6 +98,32 @@ public final class Pockets {
     /** Unique slot group/panel id for (hotbar, depth). */
     public static String groupId(int hotbar, int depth) {
         return "pocket_" + hotbar + "_" + depth;
+    }
+
+    /**
+     * The panel id a pocket's slot is registered under. One source for the
+     * creation mixin, the behavior declarations and the group declarations, so a
+     * mismatch can never produce a second, set-less group when the menu builds.
+     */
+    public static String panelId(int hotbar, int depth) {
+        return MOD_ID + ":" + groupId(hotbar, depth);
+    }
+
+    /** The one row the 27 pockets share in MenuKit's slot group listing. */
+    public static final SlotGroupSet POCKET_SET = new SlotGroupSet(MOD_ID, "pockets");
+
+    /**
+     * Declares the 27 pocket groups with MenuKit at common init: player inventory
+     * storage (searches should find a stack in a pocket), all in {@link #POCKET_SET}
+     * so a settings screen shows one "Pockets" row rather than 27. Idempotent.
+     */
+    public static void declareGroups() {
+        for (int n = 0; n < HOTBAR_SLOTS; n++) {
+            for (int d = 0; d < MAX_PER_SLOT; d++) {
+                SlotGroups.declare(MKCSlots.groupId(panelId(n, d), groupId(n, d)),
+                        SlotGroupCategory.PLAYER_INVENTORY, POCKET_SET);
+            }
+        }
     }
 
     /** True for any pocket slot's group id (see {@link #groupId}) — used to ask

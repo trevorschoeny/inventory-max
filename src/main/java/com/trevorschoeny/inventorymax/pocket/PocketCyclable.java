@@ -4,6 +4,11 @@ import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
 import com.trevorschoeny.inventoryplus.api.CyclerOperation;
 import com.trevorschoeny.inventoryplus.api.HotbarCyclable;
 import com.trevorschoeny.inventorymax.config.IMConfig;
+import com.trevorschoeny.inventorymax.operations.InventoryMaxOperations;
+import com.trevorschoeny.inventorymax.operations.ServedOperation;
+import com.trevlar.menukit.window.BehaviorKey;
+import com.trevlar.menukit.window.TriBool;
+import net.minecraft.client.Minecraft;
 import com.trevlar.menukit.core.Storage;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -115,6 +120,17 @@ public final class PocketCyclable implements HotbarCyclable {
 
     @Override
     public CyclerOperation bringToHotbar(int slot) {
+        return bringToHotbar(slot, InventoryMaxOperations.POCKET_CYCLE, InventoryMaxOperations.POCKET_CYCLE);
+    }
+
+    /**
+     * Brings the pocket down as {@code take}/{@code put}: a restock or tool switch
+     * through a pocket is judged as that, not as the player cycling. Asked here
+     * before sending, and again on the server for the operation the packet names.
+     * The undo reverses under the same operation.
+     */
+    @Override
+    public CyclerOperation bringToHotbar(int slot, BehaviorKey<TriBool> take, BehaviorKey<TriBool> put) {
         // Re-validate the claim — the caller may hold a stale id, or the pocket
         // count may have changed between query and bring.
         if (hotbarPositionOf(slot) == -1) return CyclerOperation.NO_OP;
@@ -130,7 +146,11 @@ public final class PocketCyclable implements HotbarCyclable {
         boolean forward = fwdSteps <= bwdSteps;
         int steps = Math.min(fwdSteps, bwdSteps);
         if (steps <= 0) return CyclerOperation.NO_OP;
-        rotate(hotbar, count, forward, steps);
+        // The same judgement Inventory Plus asks before choosing this pocket as a
+        // source, so a pocket it chose is one this bring will run for.
+        if (!allowsBringToHotbar(slot, take, put)) return CyclerOperation.NO_OP;
+        ServedOperation op = ServedOperation.servingFor(take, put);
+        rotate(hotbar, count, forward, steps, op);
         // Undo: same step count, opposite direction. Capture the parameters so
         // the reversal doesn't depend on (possibly drifted) current state —
         // matches the CyclerOperation drift-tolerance contract.
@@ -138,21 +158,69 @@ public final class PocketCyclable implements HotbarCyclable {
         final int undoCount = count;
         final int undoSteps = steps;
         final boolean undoForward = !forward;
-        return () -> rotate(undoHotbar, undoCount, undoForward, undoSteps);
+        return () -> rotate(undoHotbar, undoCount, undoForward, undoSteps, op);
     }
 
     @Override
     public boolean quickMoveOut(int slot) {
+        return quickMoveOut(slot, InventoryMaxOperations.POCKET_CYCLE, InventoryMaxOperations.POCKET_CYCLE);
+    }
+
+    /**
+     * Quick-moves the pocket out as {@code take}/{@code put}. The pocket being
+     * emptied is asked here; where the item lands is judged on the server, inside
+     * the quick-move, under the operation the packet names.
+     */
+    @Override
+    public boolean quickMoveOut(int slot, BehaviorKey<TriBool> take, BehaviorKey<TriBool> put) {
         // Same claim check as bringToHotbar — only our revealed pockets.
         if (hotbarPositionOf(slot) == -1) return false;
+        if (!allowsQuickMoveOut(slot, take, put)) {
+            // Ours, and refused. True, not false: false would tell the caller to
+            // click this pocket id as an ordinary inventory slot.
+            return true;
+        }
         // Server-authoritative move: the in-world pocket slot is inert
         // client-side, so the server runs the real quick-move and routes the
         // content (totem → equipment slot, armor → armor slot) the same way a
         // shift-click would, then syncs the result back. No hotbar slot
         // changes here (the content leaves the pocket for its destination), so
         // unlike bringToHotbar there's no Auto-Restock slot to re-baseline.
-        ClientPlayNetworking.send(new PocketQuickMoveC2S(hotbarOf(slot), depthOf(slot)));
+        ClientPlayNetworking.send(new PocketQuickMoveC2S(hotbarOf(slot), depthOf(slot),
+                ServedOperation.servingFor(take, put)));
         return true;
+    }
+
+    /**
+     * Whether bringing this pocket down as {@code take}/{@code put} would run:
+     * every slot in its hotbar column's ring, the hotbar slot included, allows
+     * both, which is {@link PocketRing#rotationAllowed}. Inventory Plus asks
+     * this while it chooses a source for a restock or a tool switch, so a
+     * pocket that would refuse is passed over instead of chosen and then
+     * silently not moved. {@link #bringToHotbar} applies the same answer.
+     */
+    @Override
+    public boolean allowsBringToHotbar(int slot, BehaviorKey<TriBool> take, BehaviorKey<TriBool> put) {
+        if (hotbarPositionOf(slot) == -1) return false;
+        Player player = Minecraft.getInstance().player;
+        int hotbar = hotbarOf(slot);
+        return player != null && PocketRing.rotationAllowed(
+                player.inventoryMenu, player, hotbar, PocketState.count(hotbar), take, put);
+    }
+
+    /**
+     * Whether quick-moving this pocket out as {@code take}/{@code put} would
+     * run: the pocket allows {@code take}, which is
+     * {@link PocketRing#takeAllowed}. Where the item lands is judged on the
+     * server inside the move, so {@code put} is not asked here.
+     * {@link #quickMoveOut} applies the same answer.
+     */
+    @Override
+    public boolean allowsQuickMoveOut(int slot, BehaviorKey<TriBool> take, BehaviorKey<TriBool> put) {
+        if (hotbarPositionOf(slot) == -1) return false;
+        Player player = Minecraft.getInstance().player;
+        return player != null && PocketRing.takeAllowed(
+                player.inventoryMenu, player, hotbarOf(slot), depthOf(slot), take);
     }
 
     /**
@@ -162,10 +230,10 @@ public final class PocketCyclable implements HotbarCyclable {
      * swapped-in tool as a damage / run-out event. (See the class javadoc for
      * why pockets need this and Column Cycler doesn't.)
      */
-    private static void rotate(int hotbar, int count, boolean forward, int steps) {
+    private static void rotate(int hotbar, int count, boolean forward, int steps, ServedOperation op) {
         InventoryPlusApi.suppressRestockFor(hotbar);
         for (int i = 0; i < steps; i++) {
-            ClientPlayNetworking.send(new PocketRotateC2S(hotbar, count, forward));
+            ClientPlayNetworking.send(new PocketRotateC2S(hotbar, count, forward, op));
         }
     }
 }

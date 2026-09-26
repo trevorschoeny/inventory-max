@@ -1,5 +1,7 @@
 package com.trevorschoeny.inventorymax.pocket;
 
+import com.trevorschoeny.inventorymax.operations.ServedOperation;
+
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -20,8 +22,13 @@ import net.minecraft.resources.Identifier;
  * <p>{@code count} is the client's current per-world pocket count for that
  * hotbar slot (the server doesn't track it). Trusting it is harmless — it only
  * bounds which pocket slots participate in the rotation.
+ *
+ * <p>{@code op} is the operation the rotation serves: the pocket's own cycle, or
+ * a restock or tool switch reaching a pocket. The server asks
+ * {@code SlotOperations.allows} for it on every ring slot before rotating
+ * ({@link com.trevorschoeny.inventorymax.operations.ServedOperation}).
  */
-public record PocketRotateC2S(int hotbar, int count, boolean forward)
+public record PocketRotateC2S(int hotbar, int count, boolean forward, ServedOperation op)
         implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<PocketRotateC2S> TYPE =
@@ -34,8 +41,10 @@ public record PocketRotateC2S(int hotbar, int count, boolean forward)
                         buf.writeVarInt(p.hotbar);
                         buf.writeVarInt(p.count);
                         buf.writeBoolean(p.forward);
+                        buf.writeVarInt(p.op.toWire());
                     },
-                    buf -> new PocketRotateC2S(buf.readVarInt(), buf.readVarInt(), buf.readBoolean()));
+                    buf -> new PocketRotateC2S(buf.readVarInt(), buf.readVarInt(), buf.readBoolean(),
+                            ServedOperation.fromWire(buf.readVarInt())));
 
     @Override
     public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {

@@ -4,6 +4,8 @@ import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
 import com.trevorschoeny.inventoryplus.api.CyclerDirection;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.config.IMKeybinds;
+import com.trevorschoeny.inventorymax.operations.InventoryMaxOperations;
+import com.trevorschoeny.inventorymax.operations.ServedOperation;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -69,11 +71,17 @@ public final class PocketInput {
         if (hotbar < 0 || hotbar >= Pockets.HOTBAR_SLOTS) return;
         int count = PocketState.count(hotbar);
         if (count < 1) return; // no cycle (need ≥1 pocket + hotbar)
+        // Asked before sending: Inventory Plus's locks live on this client, and a
+        // dedicated server has no Inventory Plus to ask. The server asks again.
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+        if (!PocketRing.rotationAllowed(mc.player.inventoryMenu, mc.player, hotbar, count,
+                InventoryMaxOperations.POCKET_CYCLE, InventoryMaxOperations.POCKET_CYCLE)) return;
         // Tell Auto-Restock this is a deliberate hand-item change — otherwise a
         // wrap to an empty pocket reads as "held item ran out" and it switches
         // the selected slot to a backup stack.
         InventoryPlusApi.suppressRestockFor(hotbar);
-        ClientPlayNetworking.send(new PocketRotateC2S(hotbar, count, forward));
+        ClientPlayNetworking.send(new PocketRotateC2S(hotbar, count, forward, ServedOperation.POCKET_CYCLE));
         // Predict the rotation locally so the HUD animation is drawn against the
         // post-rotation arrangement (the rotation is server-authoritative and
         // arrives a round-trip later — without this the animation desyncs).
