@@ -15,6 +15,7 @@ import com.trevorschoeny.inventorymax.pocket.PocketHover;
 import com.trevorschoeny.inventorymax.pocket.PocketInput;
 import com.trevorschoeny.inventorymax.pocket.PocketPixelPanels;
 import com.trevorschoeny.inventorymax.pocket.PocketState;
+import com.trevorschoeny.inventorymax.settings.MaxSettingsTabs;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -43,6 +44,9 @@ public class InventoryMaxClient implements ClientModInitializer {
         ServedOperation.verifyMirrors(InventoryPlusOperations.RESTOCK_TAKE,
                 InventoryPlusOperations.RESTOCK_PUT, InventoryPlusOperations.AUTO_TOOL_SWITCH);
         IMKeybinds.register();
+        // Pockets, Equipment Slots and Mend Anywhere tabs in Inventory Plus's
+        // settings menu, replacing its stand-ins.
+        MaxSettingsTabs.register();
         PocketState.load();
         PocketInput.register();
         // Contribute pockets to IP's shared cycle HUD (the generalization
