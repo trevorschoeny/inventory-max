@@ -14,8 +14,8 @@ HUD indicators show what's in the equipment slots. Every feature has its own tog
 
 ## Requirements
 
-- Inventory Plus 1.2.0 or newer
-- MenuKit 2.0.0 or newer and MenuKit: Containers 2.0.0 or newer
+- Inventory Plus 1.6.0 or newer
+- MenuKit 5.0.0 or newer and MenuKit: Containers 5.0.0 or newer, both below 6.0.0
 - Fabric API
 
 Install on both client and server.
