@@ -1,9 +1,12 @@
 package com.trevorschoeny.inventorymax.settings;
 
+import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.config.IMKeybinds;
+import com.trevorschoeny.inventorymax.pocket.PocketHudMode;
 
 import com.trevlar.menukit.core.Checkbox;
 import com.trevlar.menukit.core.Divider;
+import com.trevlar.menukit.core.Dropdown;
 import com.trevlar.menukit.core.Flow;
 import com.trevlar.menukit.core.PanelElement;
 import com.trevlar.menukit.core.Tabs;
@@ -19,8 +22,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -32,8 +38,9 @@ import java.util.function.Supplier;
  * <p>The two mods share only the menu's name and the three tab ids below;
  * Inventory Max imports nothing of Inventory Plus's for this.
  *
- * <p>Scaffold stage: the bodies are placeholders. Every control shows its
- * {@code IMConfig} default and is disabled; nothing reads or writes config.
+ * <p>Half wired: a control with an {@code IMConfig} setting behind it reads
+ * it every frame and saves on change; the rest (the inventory-button
+ * toggles, the reach) are greyed placeholders, as in Inventory Plus's tabs.
  */
 public final class MaxSettingsTabs {
 
@@ -61,11 +68,17 @@ public final class MaxSettingsTabs {
 
     private static List<PanelElement> pockets() {
         Body b = new Body()
-                .topRow("Use Pockets", true, "Show the Pockets button",
+                .topRow("Use Pockets", IMConfig::pocketCyclerEnabled, IMConfig::setPocketCyclerEnabled,
+                        "Show the Pockets button",
                         IMKeybinds.CYCLE_FORWARD, IMKeybinds.CYCLE_BACKWARD);
         b.heading("Options")
-                .checkbox("Show the cycle beside the hotbar", true)
-                .checkbox("Restock and Auto Tool Switch may take from pockets", true);
+                .choice("Beside the hotbar", Arrays.asList(PocketHudMode.values()),
+                        m -> m == PocketHudMode.NONE ? "Off" : "Mini hotbar",
+                        IMConfig::pocketHudMode, IMConfig::setPocketHudMode,
+                        () -> !IMConfig.pocketCyclerEnabled())
+                .checkbox("Restock and Auto Tool Switch may take from pockets",
+                        IMConfig::pocketsSupplyAutomation, IMConfig::setPocketsSupplyAutomation,
+                        () -> !IMConfig.pocketCyclerEnabled());
         // Pocket participation is heading for reach (deferred.md), so it gets the list now.
         // A group a mod added carries the mod in parentheses, as Inventory Plus's
         // tabs do (SettingsTabs.groupLabel, package-private there). Lock groups
@@ -82,15 +95,19 @@ public final class MaxSettingsTabs {
 
     private static List<PanelElement> equipmentSlots() {
         Body b = new Body()
-                .topRow("Use Equipment Slots", true, "Show the Equipment Slots button");
+                .topRow("Use Equipment Slots", IMConfig::equipmentSlotsEnabled, IMConfig::setEquipmentSlotsEnabled,
+                        "Show the Equipment Slots button");
         b.heading("Options")
-                .checkbox("Show elytra and totem icons beside the hotbar", true);
+                .checkbox("Show elytra and totem icons beside the hotbar",
+                        IMConfig::equipmentHudCue, IMConfig::setEquipmentHudCue,
+                        () -> !IMConfig.equipmentSlotsEnabled());
         return b.build();
     }
 
     private static List<PanelElement> mendAnywhere() {
         Body b = new Body()
-                .topRow("Use Mend Anywhere", true, "Show the Mend Anywhere button");
+                .topRow("Use Mend Anywhere", IMConfig::mendInventoryItems, IMConfig::setMendInventoryItems,
+                        "Show the Mend Anywhere button");
         b.heading("Options")
                 .line("Mending items repair from XP anywhere in your inventory, not only in your hands and armor.");
         return b.build();
@@ -130,11 +147,16 @@ public final class MaxSettingsTabs {
             return this;
         }
 
-        /** On/off, the button toggle and the keys, in one row that wraps. */
-        Body topRow(String useLabel, boolean on, String showButtonLabel, KeyMapping... keys) {
+        /**
+         * On/off, the button toggle and the keys, in one row that wraps. The
+         * switch reads {@code on} every frame and saves through {@code setOn};
+         * the button toggle has no setting yet, so it is a greyed placeholder.
+         */
+        Body topRow(String useLabel, BooleanSupplier on, Consumer<Boolean> setOn,
+                    String showButtonLabel, KeyMapping... keys) {
             List<PanelElement> row = new ArrayList<>();
-            row.add(new Toggle(0, 0, 40, 14, on, v -> {}, DISABLED).label(Component.literal(useLabel)));
-            row.add(new Checkbox(0, 0, true, Component.literal(showButtonLabel), v -> {}, DISABLED));
+            row.add(Toggle.linked(0, 0, 40, 14, on, setOn, null).label(Component.literal(useLabel)));
+            row.add(Checkbox.linked(0, 0, () -> true, Component.literal(showButtonLabel), v -> {}, DISABLED));
             for (KeyMapping key : keys) {
                 row.add(new ChordButton(key).label(Component.translatable(key.getName())));
             }
@@ -143,8 +165,25 @@ public final class MaxSettingsTabs {
             return this;
         }
 
-        Body checkbox(String label, boolean on) {
-            out.add(new Checkbox(0, y, on, Component.literal(label), v -> {}, DISABLED));
+        /** A setting with a few named values, bound to its config and greyed while {@code unavailable}. */
+        <T> Body choice(String label, List<T> values, Function<T, String> name,
+                        Supplier<T> get, Consumer<T> set, BooleanSupplier unavailable) {
+            out.add(new TextLabel(12, y + 4, Component.literal(label), TEXT, false));
+            out.add(Dropdown.<T>builder()
+                    .at(12 + Minecraft.getInstance().font.width(label) + 6, y)
+                    .triggerSize(110, 16)
+                    .items(values)
+                    .label(v -> Component.literal(name.apply(v)))
+                    .selection(get, set)
+                    .disabledWhen(unavailable)
+                    .build());
+            y += 20;
+            return this;
+        }
+
+        /** A checkbox bound to its setting, greyed while {@code unavailable}. */
+        Body checkbox(String label, BooleanSupplier get, Consumer<Boolean> set, BooleanSupplier unavailable) {
+            out.add(Checkbox.linked(0, y, get, Component.literal(label), set, unavailable));
             y += 14;
             return this;
         }
