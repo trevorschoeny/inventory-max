@@ -14,6 +14,7 @@ import com.trevlar.menukit.inject.SlotGroups;
 import com.trevorschoeny.keybindery.chord.ChordButton;
 
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -54,42 +55,52 @@ public final class MaxSettingsTabs {
 
     // ── Bodies ──────────────────────────────────────────────────────────
 
+    // Laid out as Inventory Plus's feature tabs are (Trev, 2026-09-27): one
+    // wrapping row of on/off, the button toggle and the keys; then the
+    // options; then the reach, closed.
+
     private static List<PanelElement> pockets() {
-        Body b = new Body();
-        b.heading("On/off").onOff("Use Pockets", true);
-        // Pocket participation is heading for reach (deferred.md), so it gets the list now.
-        List<Component> groups = new ArrayList<>();
-        // A group a mod added carries the mod in parentheses, as Inventory Plus's
-        // tabs do (SettingsTabs.groupLabel, package-private there).
-        for (SlotGroups.Entry e : SlotGroups.listing()) {
-            Component source = e.source();
-            groups.add(source == null ? e.name() : e.name().copy().append(" (").append(source).append(")"));
-        }
-        b.heading("Reach").reach(groups);
-        b.heading("Keys")
-                .key(IMKeybinds.CYCLE_FORWARD)
-                .key(IMKeybinds.CYCLE_BACKWARD);
+        Body b = new Body()
+                .topRow("Use Pockets", true, "Show the Pockets button",
+                        IMKeybinds.CYCLE_FORWARD, IMKeybinds.CYCLE_BACKWARD);
         b.heading("Options")
                 .checkbox("Show the cycle beside the hotbar", true)
                 .checkbox("Restock and Auto Tool Switch may take from pockets", true);
+        // Pocket participation is heading for reach (deferred.md), so it gets the list now.
+        // A group a mod added carries the mod in parentheses, as Inventory Plus's
+        // tabs do (SettingsTabs.groupLabel, package-private there). Lock groups
+        // join when Inventory Plus offers them through its API.
+        List<Component> places = new ArrayList<>();
+        for (SlotGroups.Entry e : SlotGroups.listing()) {
+            Component source = e.source();
+            places.add(source == null ? e.name() : e.name().copy().append(" (").append(source).append(")"));
+        }
+        places.addAll(IN_INVENTORY);
+        b.reachSection("Reach", places);
         return b.build();
     }
 
     private static List<PanelElement> equipmentSlots() {
-        Body b = new Body();
-        b.heading("On/off").onOff("Use Equipment Slots", true);
+        Body b = new Body()
+                .topRow("Use Equipment Slots", true, "Show the Equipment Slots button");
         b.heading("Options")
                 .checkbox("Show elytra and totem icons beside the hotbar", true);
         return b.build();
     }
 
     private static List<PanelElement> mendAnywhere() {
-        Body b = new Body();
-        b.heading("On/off").onOff("Use Mend Anywhere", true);
+        Body b = new Body()
+                .topRow("Use Mend Anywhere", true, "Show the Mend Anywhere button");
         b.heading("Options")
                 .line("Mending items repair from XP anywhere in your inventory, not only in your hands and armor.");
         return b.build();
     }
+
+    /** Containers the player carries, offered after the slot groups, as Inventory Plus does. */
+    private static final List<Component> IN_INVENTORY = List.of(
+            Component.literal("Shulker Boxes (in inventory)"),
+            Component.literal("Bundles (in inventory)"),
+            Component.literal("Ender Chest (in inventory)"));
 
     // ── Rows ────────────────────────────────────────────────────────────
     //
@@ -100,6 +111,7 @@ public final class MaxSettingsTabs {
     private static final class Body {
         private static final BooleanSupplier DISABLED = () -> true;
         private static final int TEXT = 0xFF555555;
+        private static final int GREY = 0xFF8B8B8B;
 
         private final List<PanelElement> out = new ArrayList<>();
         private int y = 0;
@@ -118,9 +130,16 @@ public final class MaxSettingsTabs {
             return this;
         }
 
-        Body onOff(String label, boolean on) {
-            out.add(new Toggle(0, y, 40, 14, on, v -> {}, DISABLED).label(Component.literal(label)));
-            y += 18;
+        /** On/off, the button toggle and the keys, in one row that wraps. */
+        Body topRow(String useLabel, boolean on, String showButtonLabel, KeyMapping... keys) {
+            List<PanelElement> row = new ArrayList<>();
+            row.add(new Toggle(0, 0, 40, 14, on, v -> {}, DISABLED).label(Component.literal(useLabel)));
+            row.add(new Checkbox(0, 0, true, Component.literal(showButtonLabel), v -> {}, DISABLED));
+            for (KeyMapping key : keys) {
+                row.add(new ChordButton(key).label(Component.translatable(key.getName())));
+            }
+            out.add(Flow.of(row).gap(10, 4).at(0, y));
+            y += 20;
             return this;
         }
 
@@ -130,18 +149,17 @@ public final class MaxSettingsTabs {
             return this;
         }
 
-        Body reach(List<Component> places) {
-            List<PanelElement> boxes = new ArrayList<>();
-            for (Component place : places) boxes.add(new Checkbox(0, 0, true, place, v -> {}, DISABLED));
-            out.add(Flow.of(boxes).gap(10, 4).at(12, y));
+        /**
+         * A reach, drawn closed: an arrow, the title, and how many places are
+         * on. MenuKit has no collapsible section yet, so it does not open.
+         */
+        Body reachSection(String title, List<Component> places) {
+            if (y > 0) y += 8;
+            String text = "▶ " + title;
+            out.add(new TextLabel(0, y, Component.literal(text), TextLabel.COLOR_DARK, false));
+            int x = Minecraft.getInstance().font.width(text) + 8;
+            out.add(new TextLabel(x, y, Component.literal("all " + places.size() + " on"), GREY, false));
             y += 14;
-            return this;
-        }
-
-        /** A working key: Keybindery's button, labelled with the key's name, as Inventory Plus's tabs do. */
-        Body key(KeyMapping key) {
-            out.add(new ChordButton(key).label(Component.translatable(key.getName())).at(0, y));
-            y += 20;
             return this;
         }
 
