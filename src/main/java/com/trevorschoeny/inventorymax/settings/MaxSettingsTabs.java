@@ -133,7 +133,7 @@ public final class MaxSettingsTabs {
             out.add(new TextLabel(0, y, Component.literal(description), TEXT, false));
             y += 16;
             out.add(Flow.of(List.of(
-                    Toggle.linked(0, 0, 40, 14, on, setOn, null)
+                    Toggle.linked(0, 0, 40, 16, on, setOn, null)
                             .label(() -> Component.literal(on.getAsBoolean() ? "On" : "Off")),
                     new Button(0, 0, Minecraft.getInstance().font.width("Reset to Defaults") + 12, 16,
                             Component.literal("Reset to Defaults"), b -> {}, DISABLED)))
