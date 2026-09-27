@@ -9,6 +9,7 @@ import com.trevlar.menukit.core.Divider;
 import com.trevlar.menukit.core.Dropdown;
 import com.trevlar.menukit.core.Flow;
 import com.trevlar.menukit.core.PanelElement;
+import com.trevlar.menukit.core.Section;
 import com.trevlar.menukit.core.Tabs;
 import com.trevlar.menukit.core.TextLabel;
 import com.trevlar.menukit.core.Toggle;
@@ -128,7 +129,6 @@ public final class MaxSettingsTabs {
     private static final class Body {
         private static final BooleanSupplier DISABLED = () -> true;
         private static final int TEXT = 0xFF555555;
-        private static final int GREY = 0xFF8B8B8B;
 
         private final List<PanelElement> out = new ArrayList<>();
         private int y = 0;
@@ -189,16 +189,20 @@ public final class MaxSettingsTabs {
         }
 
         /**
-         * A reach, drawn closed: an arrow, the title, and how many places are
-         * on. MenuKit has no collapsible section yet, so it does not open.
+         * A reach, as MenuKit's collapsible {@link Section}: closed, how many
+         * places are on; open, their checkboxes (greyed placeholders until
+         * reach is wired). Rows after it are placed as if it were closed.
          */
         Body reachSection(String title, List<Component> places) {
             if (y > 0) y += 8;
-            String text = "▶ " + title;
-            out.add(new TextLabel(0, y, Component.literal(text), TextLabel.COLOR_DARK, false));
-            int x = Minecraft.getInstance().font.width(text) + 8;
-            out.add(new TextLabel(x, y, Component.literal("all " + places.size() + " on"), GREY, false));
-            y += 14;
+            List<PanelElement> boxes = new ArrayList<>();
+            for (Component place : places) boxes.add(new Checkbox(0, 0, true, place, v -> {}, DISABLED));
+            out.add(Section.builder(Component.literal(title))
+                    .at(0, y)
+                    .summary(() -> Component.literal("all " + places.size() + " on"))
+                    .add(Flow.of(boxes).gap(10, 4).at(12, 0))
+                    .build());
+            y += Section.HEADER_HEIGHT + 2;
             return this;
         }
 
