@@ -59,7 +59,12 @@ public final class MaxSettingsTabs {
         b.heading("On/off").onOff("Use Pockets", true);
         // Pocket participation is heading for reach (deferred.md), so it gets the list now.
         List<Component> groups = new ArrayList<>();
-        for (SlotGroups.Entry e : SlotGroups.listing()) groups.add(e.name());
+        // A group a mod added carries the mod in parentheses, as Inventory Plus's
+        // tabs do (SettingsTabs.groupLabel, package-private there).
+        for (SlotGroups.Entry e : SlotGroups.listing()) {
+            Component source = e.source();
+            groups.add(source == null ? e.name() : e.name().copy().append(" (").append(source).append(")"));
+        }
         b.heading("Reach").reach(groups);
         b.heading("Keys")
                 .key(IMKeybinds.CYCLE_FORWARD)
