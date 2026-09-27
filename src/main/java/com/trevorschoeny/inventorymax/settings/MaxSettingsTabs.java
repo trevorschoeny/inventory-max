@@ -72,7 +72,7 @@ public final class MaxSettingsTabs {
         return new Body()
                 .frame("Pockets", "Adds up to three extra slots behind each hotbar slot, "
                         + "and keys to cycle through them.",
-                        "Use Pockets", IMConfig::pocketCyclerEnabled, IMConfig::setPocketCyclerEnabled)
+                        IMConfig::pocketCyclerEnabled, IMConfig::setPocketCyclerEnabled)
                 .placeholderCheckbox("Show the Pockets button")
                 .key(IMKeybinds.CYCLE_FORWARD)
                 .key(IMKeybinds.CYCLE_BACKWARD)
@@ -87,7 +87,7 @@ public final class MaxSettingsTabs {
     private static List<PanelElement> equipmentSlots() {
         return new Body()
                 .frame("Equipment Slots", "Adds an elytra slot and a totem slot to your inventory.",
-                        "Use Equipment Slots", IMConfig::equipmentSlotsEnabled, IMConfig::setEquipmentSlotsEnabled)
+                        IMConfig::equipmentSlotsEnabled, IMConfig::setEquipmentSlotsEnabled)
                 .placeholderCheckbox("Show the Equipment Slots button")
                 .checkbox("Show elytra and totem icons beside the hotbar",
                         IMConfig::equipmentHudCue, IMConfig::setEquipmentHudCue, () -> false)
@@ -98,7 +98,7 @@ public final class MaxSettingsTabs {
         return new Body()
                 .frame("Mend Anywhere", "Mending items repair from XP anywhere in your inventory, "
                         + "not only in your hands and armor.",
-                        "Use Mend Anywhere", IMConfig::mendInventoryItems, IMConfig::setMendInventoryItems)
+                        IMConfig::mendInventoryItems, IMConfig::setMendInventoryItems)
                 .placeholderCheckbox("Show the Mend Anywhere button")
                 .build();
     }
@@ -120,19 +120,19 @@ public final class MaxSettingsTabs {
         private BooleanSupplier featureOn = () -> true;
 
         /**
-         * The frame: the title, bold at twice size; the description, bold;
-         * the feature's on/off toggle with Reset to Defaults (greyed until
+         * The frame: the title, bold at twice size; the description; the
+         * feature's on/off toggle, reading "On" or "Off", with Reset to Defaults (greyed until
          * reset is built) to its right; then a line.
          */
-        Body frame(String title, String description, String useLabel,
-                   BooleanSupplier on, Consumer<Boolean> setOn) {
+        Body frame(String title, String description, BooleanSupplier on, Consumer<Boolean> setOn) {
             out.add(new TextLabel(0, y, Component.literal(title).withStyle(ChatFormatting.BOLD),
                     TextLabel.COLOR_DARK, false).scale(2f));
             y += 24;
-            out.add(new TextLabel(0, y, Component.literal(description).withStyle(ChatFormatting.BOLD), TEXT, false));
+            out.add(new TextLabel(0, y, Component.literal(description), TEXT, false));
             y += 16;
             out.add(Flow.of(List.of(
-                    Toggle.linked(0, 0, 40, 14, on, setOn, null).label(Component.literal(useLabel)),
+                    Toggle.linked(0, 0, 40, 14, on, setOn, null)
+                            .label(() -> Component.literal(on.getAsBoolean() ? "On" : "Off")),
                     new Button(0, 0, Minecraft.getInstance().font.width("Reset to Defaults") + 12, 16,
                             Component.literal("Reset to Defaults"), b -> {}, DISABLED)))
                     .gap(10, 4).at(0, y));
