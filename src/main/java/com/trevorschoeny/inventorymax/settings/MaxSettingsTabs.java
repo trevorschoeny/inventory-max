@@ -8,12 +8,15 @@ import com.trevlar.menukit.core.Button;
 import com.trevlar.menukit.core.Checkbox;
 import com.trevlar.menukit.core.Divider;
 import com.trevlar.menukit.core.Dropdown;
+import com.trevlar.menukit.core.Flow;
 import com.trevlar.menukit.core.PanelElement;
 import com.trevlar.menukit.core.Tabs;
 import com.trevlar.menukit.core.TextLabel;
+import com.trevlar.menukit.core.Toggle;
 
 import com.trevorschoeny.keybindery.chord.ChordButton;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -117,20 +120,23 @@ public final class MaxSettingsTabs {
         private BooleanSupplier featureOn = () -> true;
 
         /**
-         * The frame: the title, the description, Reset to Defaults (greyed
-         * until reset is built), the feature's on/off checkbox, then a line.
+         * The frame: the title, bold at twice size; the description, bold;
+         * the feature's on/off toggle with Reset to Defaults (greyed until
+         * reset is built) to its right; then a line.
          */
         Body frame(String title, String description, String useLabel,
                    BooleanSupplier on, Consumer<Boolean> setOn) {
-            out.add(new TextLabel(0, y, Component.literal(title), TextLabel.COLOR_DARK, false));
-            y += 14;
-            out.add(new TextLabel(0, y, Component.literal(description), TEXT, false));
+            out.add(new TextLabel(0, y, Component.literal(title).withStyle(ChatFormatting.BOLD),
+                    TextLabel.COLOR_DARK, false).scale(2f));
+            y += 24;
+            out.add(new TextLabel(0, y, Component.literal(description).withStyle(ChatFormatting.BOLD), TEXT, false));
             y += 16;
-            out.add(new Button(0, y, Minecraft.getInstance().font.width("Reset to Defaults") + 12, 16,
-                    Component.literal("Reset to Defaults"), b -> {}, DISABLED));
+            out.add(Flow.of(List.of(
+                    Toggle.linked(0, 0, 40, 14, on, setOn, null).label(Component.literal(useLabel)),
+                    new Button(0, 0, Minecraft.getInstance().font.width("Reset to Defaults") + 12, 16,
+                            Component.literal("Reset to Defaults"), b -> {}, DISABLED)))
+                    .gap(10, 4).at(0, y));
             y += 22;
-            out.add(Checkbox.linked(0, y, on, Component.literal(useLabel), setOn, null));
-            y += 16;
             featureOn = on;
             // ponytail: a long divider; MenuKit caps it to the body's width.
             out.add(Divider.horizontal(0, y, 4000, 0xFF8B8B8B, 1));
