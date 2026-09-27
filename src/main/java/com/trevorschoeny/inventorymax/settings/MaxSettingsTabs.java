@@ -6,11 +6,11 @@ import com.trevorschoeny.inventorymax.pocket.PocketHudMode;
 
 import com.trevlar.menukit.core.Button;
 import com.trevlar.menukit.core.Checkbox;
+import com.trevlar.menukit.core.Divider;
 import com.trevlar.menukit.core.Dropdown;
 import com.trevlar.menukit.core.PanelElement;
 import com.trevlar.menukit.core.Tabs;
 import com.trevlar.menukit.core.TextLabel;
-import com.trevlar.menukit.core.Toggle;
 
 import com.trevorschoeny.keybindery.chord.ChordButton;
 
@@ -60,44 +60,42 @@ public final class MaxSettingsTabs {
 
     // ── Bodies ──────────────────────────────────────────────────────────
     //
-    // The frame Inventory Plus's tabs have (Trev, 2026-09-27): Back to game
-    // and Reset, the title, a description, the on/off switch, then one setting
-    // per line. Every reach lives in Inventory Plus's Reach tab.
+    // The frame Inventory Plus's tabs have (Trev, 2026-09-27): the title, a
+    // description, Reset to Defaults, the on/off checkbox, a line, then one
+    // setting per line, all greyed while the feature is off. Every reach
+    // lives in Inventory Plus's Reach tab.
 
     private static List<PanelElement> pockets() {
         return new Body()
                 .frame("Pockets", "Adds up to three extra slots behind each hotbar slot, "
-                        + "and keys to cycle through them.")
-                .onOff("Use Pockets", IMConfig::pocketCyclerEnabled, IMConfig::setPocketCyclerEnabled)
+                        + "and keys to cycle through them.",
+                        "Use Pockets", IMConfig::pocketCyclerEnabled, IMConfig::setPocketCyclerEnabled)
                 .placeholderCheckbox("Show the Pockets button")
                 .key(IMKeybinds.CYCLE_FORWARD)
                 .key(IMKeybinds.CYCLE_BACKWARD)
                 .choice("Beside the hotbar", Arrays.asList(PocketHudMode.values()),
                         m -> m == PocketHudMode.NONE ? "Off" : "Mini hotbar",
-                        IMConfig::pocketHudMode, IMConfig::setPocketHudMode,
-                        () -> !IMConfig.pocketCyclerEnabled())
+                        IMConfig::pocketHudMode, IMConfig::setPocketHudMode, () -> false)
                 .checkbox("Restock and Auto Tool Switch may take from pockets",
-                        IMConfig::pocketsSupplyAutomation, IMConfig::setPocketsSupplyAutomation,
-                        () -> !IMConfig.pocketCyclerEnabled())
+                        IMConfig::pocketsSupplyAutomation, IMConfig::setPocketsSupplyAutomation, () -> false)
                 .build();
     }
 
     private static List<PanelElement> equipmentSlots() {
         return new Body()
-                .frame("Equipment Slots", "Adds an elytra slot and a totem slot to your inventory.")
-                .onOff("Use Equipment Slots", IMConfig::equipmentSlotsEnabled, IMConfig::setEquipmentSlotsEnabled)
+                .frame("Equipment Slots", "Adds an elytra slot and a totem slot to your inventory.",
+                        "Use Equipment Slots", IMConfig::equipmentSlotsEnabled, IMConfig::setEquipmentSlotsEnabled)
                 .placeholderCheckbox("Show the Equipment Slots button")
                 .checkbox("Show elytra and totem icons beside the hotbar",
-                        IMConfig::equipmentHudCue, IMConfig::setEquipmentHudCue,
-                        () -> !IMConfig.equipmentSlotsEnabled())
+                        IMConfig::equipmentHudCue, IMConfig::setEquipmentHudCue, () -> false)
                 .build();
     }
 
     private static List<PanelElement> mendAnywhere() {
         return new Body()
                 .frame("Mend Anywhere", "Mending items repair from XP anywhere in your inventory, "
-                        + "not only in your hands and armor.")
-                .onOff("Use Mend Anywhere", IMConfig::mendInventoryItems, IMConfig::setMendInventoryItems)
+                        + "not only in your hands and armor.",
+                        "Use Mend Anywhere", IMConfig::mendInventoryItems, IMConfig::setMendInventoryItems)
                 .placeholderCheckbox("Show the Mend Anywhere button")
                 .build();
     }
@@ -115,40 +113,47 @@ public final class MaxSettingsTabs {
         private final List<PanelElement> out = new ArrayList<>();
         private int y = 0;
 
-        Body line(String text) {
-            out.add(new TextLabel(0, y, Component.literal(text), TEXT, false));
-            y += 12;
-            return this;
-        }
+        /** While the feature is off, every control after the frame greys and disables. */
+        private BooleanSupplier featureOn = () -> true;
 
         /**
-         * The frame: Back to game (what Escape does), Reset beside it (greyed;
-         * the plan puts it top right, which MenuKit can't align yet), the
-         * title, and the description.
+         * The frame: the title, the description, Reset to Defaults (greyed
+         * until reset is built), the feature's on/off checkbox, then a line.
          */
-        Body frame(String title, String description) {
-            int backW = Minecraft.getInstance().font.width("Back to game") + 12;
-            out.add(new Button(0, y, backW, 16, Component.literal("Back to game"),
-                    b -> Minecraft.getInstance().gui.screen().onClose()));
-            out.add(new Button(backW + 4, y, Minecraft.getInstance().font.width("Reset") + 12, 16,
-                    Component.literal("Reset"), b -> {}, DISABLED));
-            y += 22;
+        Body frame(String title, String description, String useLabel,
+                   BooleanSupplier on, Consumer<Boolean> setOn) {
             out.add(new TextLabel(0, y, Component.literal(title), TextLabel.COLOR_DARK, false));
             y += 14;
-            return line(description);
+            out.add(new TextLabel(0, y, Component.literal(description), TEXT, false));
+            y += 16;
+            out.add(new Button(0, y, Minecraft.getInstance().font.width("Reset to Defaults") + 12, 16,
+                    Component.literal("Reset to Defaults"), b -> {}, DISABLED));
+            y += 22;
+            out.add(Checkbox.linked(0, y, on, Component.literal(useLabel), setOn, null));
+            y += 16;
+            featureOn = on;
+            // ponytail: a long divider; MenuKit caps it to the body's width.
+            out.add(Divider.horizontal(0, y, 4000, 0xFF8B8B8B, 1));
+            y += 6;
+            return this;
         }
 
-        /** The feature's on/off switch, on its own line, reading and saving its setting. */
-        Body onOff(String label, BooleanSupplier on, Consumer<Boolean> setOn) {
-            y += 4;
-            out.add(Toggle.linked(0, y, 40, 14, on, setOn, null).label(Component.literal(label)));
-            y += 20;
-            return this;
+        /** {@code unavailable}, and also while the feature is off. */
+        private BooleanSupplier gated(BooleanSupplier unavailable) {
+            BooleanSupplier on = featureOn;
+            return () -> !on.getAsBoolean() || unavailable.getAsBoolean();
+        }
+
+        /** Settings text, turning grey while the feature is off. */
+        private TextLabel settingText(int x, int y, Component text) {
+            BooleanSupplier on = featureOn;
+            return new TextLabel(x, y, () -> on.getAsBoolean() ? text : text.copy().withColor(0xFF8B8B8B), TEXT, false);
         }
 
         /** A working key: Keybindery's button, labelled with the key's name. */
         Body key(KeyMapping key) {
-            out.add(new ChordButton(key).label(Component.translatable(key.getName())).at(0, y));
+            out.add(new ChordButton(key).label(Component.translatable(key.getName()))
+                    .disabledWhen(gated(() -> false)).at(0, y));
             y += 20;
             return this;
         }
@@ -161,14 +166,14 @@ public final class MaxSettingsTabs {
         /** A setting with a few named values, bound to its config and greyed while {@code unavailable}. */
         <T> Body choice(String label, List<T> values, Function<T, String> name,
                         Supplier<T> get, Consumer<T> set, BooleanSupplier unavailable) {
-            out.add(new TextLabel(12, y + 4, Component.literal(label), TEXT, false));
+            out.add(settingText(12, y + 4, Component.literal(label)));
             out.add(Dropdown.<T>builder()
                     .at(12 + Minecraft.getInstance().font.width(label) + 6, y)
                     .triggerSize(110, 16)
                     .items(values)
                     .label(v -> Component.literal(name.apply(v)))
                     .selection(get, set)
-                    .disabledWhen(unavailable)
+                    .disabledWhen(gated(unavailable))
                     .build());
             y += 20;
             return this;
@@ -176,7 +181,7 @@ public final class MaxSettingsTabs {
 
         /** A checkbox bound to its setting, greyed while {@code unavailable}. */
         Body checkbox(String label, BooleanSupplier get, Consumer<Boolean> set, BooleanSupplier unavailable) {
-            out.add(Checkbox.linked(0, y, get, Component.literal(label), set, unavailable));
+            out.add(Checkbox.linked(0, y, get, Component.literal(label), set, gated(unavailable)));
             y += 14;
             return this;
         }
