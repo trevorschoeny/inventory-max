@@ -16,7 +16,6 @@ import com.trevlar.menukit.core.Toggle;
 
 import com.trevorschoeny.keybindery.chord.ChordButton;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -73,14 +72,16 @@ public final class MaxSettingsTabs {
                 .frame("Pockets", "Adds up to three extra slots behind each hotbar slot, "
                         + "and keys to cycle through them.",
                         IMConfig::pocketCyclerEnabled, IMConfig::setPocketCyclerEnabled)
+                .heading("Misc.")
                 .placeholderCheckbox("Show the Pockets button")
-                .key(IMKeybinds.CYCLE_FORWARD)
-                .key(IMKeybinds.CYCLE_BACKWARD)
+                .checkbox("Restock and Auto Tool Switch may take from pockets",
+                        IMConfig::pocketsSupplyAutomation, IMConfig::setPocketsSupplyAutomation, () -> false)
                 .choice("Beside the hotbar", Arrays.asList(PocketHudMode.values()),
                         m -> m == PocketHudMode.NONE ? "Off" : "Mini hotbar",
                         IMConfig::pocketHudMode, IMConfig::setPocketHudMode, () -> false)
-                .checkbox("Restock and Auto Tool Switch may take from pockets",
-                        IMConfig::pocketsSupplyAutomation, IMConfig::setPocketsSupplyAutomation, () -> false)
+                .heading("Cycling")
+                .key(IMKeybinds.CYCLE_FORWARD)
+                .key(IMKeybinds.CYCLE_BACKWARD)
                 .build();
     }
 
@@ -88,6 +89,7 @@ public final class MaxSettingsTabs {
         return new Body()
                 .frame("Equipment Slots", "Adds an elytra slot and a totem slot to your inventory.",
                         IMConfig::equipmentSlotsEnabled, IMConfig::setEquipmentSlotsEnabled)
+                .heading("Misc.")
                 .placeholderCheckbox("Show the Equipment Slots button")
                 .checkbox("Show elytra and totem icons beside the hotbar",
                         IMConfig::equipmentHudCue, IMConfig::setEquipmentHudCue, () -> false)
@@ -99,6 +101,7 @@ public final class MaxSettingsTabs {
                 .frame("Mend Anywhere", "Mending items repair from XP anywhere in your inventory, "
                         + "not only in your hands and armor.",
                         IMConfig::mendInventoryItems, IMConfig::setMendInventoryItems)
+                .heading("Misc.")
                 .placeholderCheckbox("Show the Mend Anywhere button")
                 .build();
     }
@@ -120,13 +123,12 @@ public final class MaxSettingsTabs {
         private BooleanSupplier featureOn = () -> true;
 
         /**
-         * The frame: the title, bold at twice size; the description; the
+         * The frame: the title at twice size; the description; the
          * feature's on/off toggle, reading "On" or "Off", with Reset to Defaults (greyed until
          * reset is built) to its right; then a line.
          */
         Body frame(String title, String description, BooleanSupplier on, Consumer<Boolean> setOn) {
-            out.add(new TextLabel(0, y, Component.literal(title).withStyle(ChatFormatting.BOLD),
-                    TextLabel.COLOR_DARK, false).scale(2f));
+            out.add(new TextLabel(0, y, Component.literal(title), TextLabel.COLOR_DARK, false).scale(2f));
             y += 24;
             out.add(new TextLabel(0, y, Component.literal(description), TEXT, false));
             y += 16;
@@ -151,15 +153,34 @@ public final class MaxSettingsTabs {
         }
 
         /** Settings text, turning grey while the feature is off. */
-        private TextLabel settingText(int x, int y, Component text) {
+        private TextLabel settingText(int x, int y, Component text, int color) {
             BooleanSupplier on = featureOn;
-            return new TextLabel(x, y, () -> on.getAsBoolean() ? text : text.copy().withColor(0xFF8B8B8B), TEXT, false);
+            return new TextLabel(x, y, () -> on.getAsBoolean() ? text : text.copy().withColor(0xFF8B8B8B), color, false);
         }
 
         /** A working key: Keybindery's button, labelled with the key's name. */
+        // Every setting is its text on one line and its control below it, and
+        // settings sit in categories, as in Inventory Plus's tabs.
+
+        /** A category: its title and a short line under it; greys while the feature is off. */
+        Body heading(String text) {
+            y += 8;
+            out.add(settingText(0, y, Component.literal(text), TextLabel.COLOR_DARK));
+            y += 12;
+            out.add(Divider.horizontal(0, y - 2, 160, 0xFF8B8B8B, 1));
+            y += 2;
+            return this;
+        }
+
+        /** A setting's text, on its own line. */
+        private void label(Component text) {
+            out.add(settingText(0, y, text, TEXT));
+            y += 12;
+        }
+
         Body key(KeyMapping key) {
-            out.add(new ChordButton(key).label(Component.translatable(key.getName()))
-                    .disabledWhen(gated(() -> false)).at(0, y));
+            label(Component.translatable(key.getName()));
+            out.add(new ChordButton(key).disabledWhen(gated(() -> false)).at(0, y));
             y += 20;
             return this;
         }
@@ -172,9 +193,9 @@ public final class MaxSettingsTabs {
         /** A setting with a few named values, bound to its config and greyed while {@code unavailable}. */
         <T> Body choice(String label, List<T> values, Function<T, String> name,
                         Supplier<T> get, Consumer<T> set, BooleanSupplier unavailable) {
-            out.add(settingText(12, y + 4, Component.literal(label)));
+            label(Component.literal(label));
             out.add(Dropdown.<T>builder()
-                    .at(12 + Minecraft.getInstance().font.width(label) + 6, y)
+                    .at(0, y)
                     .triggerSize(110, 16)
                     .items(values)
                     .label(v -> Component.literal(name.apply(v)))
@@ -187,8 +208,9 @@ public final class MaxSettingsTabs {
 
         /** A checkbox bound to its setting, greyed while {@code unavailable}. */
         Body checkbox(String label, BooleanSupplier get, Consumer<Boolean> set, BooleanSupplier unavailable) {
-            out.add(Checkbox.linked(0, y, get, Component.literal(label), set, gated(unavailable)));
-            y += 14;
+            label(Component.literal(label));
+            out.add(Checkbox.linked(0, y, get, Component.empty(), set, gated(unavailable)));
+            y += 16;
             return this;
         }
 
