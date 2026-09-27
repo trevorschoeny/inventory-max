@@ -159,8 +159,9 @@ public final class MaxSettingsTabs {
         }
 
         /** A working key: Keybindery's button, labelled with the key's name. */
-        // Every setting is its text on one line and its control below it, and
-        // settings sit in categories, as in Inventory Plus's tabs.
+        // A setting is its text on one line and its control below it, except a
+        // checkbox, inline with its text; settings sit in categories. As in
+        // Inventory Plus's tabs.
 
         /** A category: its title and a short line under it; greys while the feature is off. */
         Body heading(String text) {
@@ -208,8 +209,7 @@ public final class MaxSettingsTabs {
 
         /** A checkbox bound to its setting, greyed while {@code unavailable}. */
         Body checkbox(String label, BooleanSupplier get, Consumer<Boolean> set, BooleanSupplier unavailable) {
-            label(Component.literal(label));
-            out.add(Checkbox.linked(0, y, get, Component.empty(), set, gated(unavailable)));
+            out.add(Checkbox.linked(0, y, get, Component.literal(label), set, gated(unavailable)));
             y += 16;
             return this;
         }
