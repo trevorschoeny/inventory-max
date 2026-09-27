@@ -65,6 +65,11 @@ dependencies {
     // (HotbarCyclableRegistry, CycleHudRegistry, CycleView, HudMode) and
     // reads IPConfig for cohabitation flags. Dependency is one-way (IM→IP).
     implementation project(':inventory-plus')
+
+    // Keybindery — required (Trev, 2026-09-27): the settings menu binds keys
+    // with its MenuKit ChordButton, the same chord capture and conflict view
+    // as Keybindery's own screens.
+    implementation project(':keybindery')
 }
 
 loom {
@@ -119,6 +124,7 @@ modrinth {
         required.project "menukit"
         required.project "menukit-containers"
         required.project "inventory-plus"
+        required.project "keybindery"
     }
 }
 

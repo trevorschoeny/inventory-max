@@ -2,7 +2,6 @@ package com.trevorschoeny.inventorymax.settings;
 
 import com.trevorschoeny.inventorymax.config.IMKeybinds;
 
-import com.trevlar.menukit.core.Button;
 import com.trevlar.menukit.core.Checkbox;
 import com.trevlar.menukit.core.Divider;
 import com.trevlar.menukit.core.Flow;
@@ -12,8 +11,9 @@ import com.trevlar.menukit.core.TextLabel;
 import com.trevlar.menukit.core.Toggle;
 import com.trevlar.menukit.inject.SlotGroups;
 
+import com.trevorschoeny.keybindery.chord.ChordButton;
+
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
@@ -138,12 +138,9 @@ public final class MaxSettingsTabs {
             return this;
         }
 
+        /** A working key: Keybindery's button, labelled with the key's name, as Inventory Plus's tabs do. */
         Body key(KeyMapping key) {
-            Component text = Component.translatable(key.getName()).copy()
-                    .append(": ").append(key.getTranslatedKeyMessage());
-            out.add(new TextLabel(0, y + 4, text, TEXT, false));
-            int x = Math.max(150, Minecraft.getInstance().font.width(text) + 8);
-            out.add(new Button(x, y, 50, 16, Component.literal("Change"), b -> {}, DISABLED));
+            out.add(new ChordButton(key).label(Component.translatable(key.getName())).at(0, y));
             y += 20;
             return this;
         }
