@@ -1,6 +1,8 @@
 package com.trevorschoeny.inventorymax.pocket;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
+import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
+import com.trevlar.menukit.core.Click;
 import com.trevlar.menukit.core.Panel;
 import com.trevlar.menukit.core.PanelElement;
 import com.trevlar.menukit.core.PanelPosition;
@@ -208,6 +210,12 @@ public final class PocketPixelPanels {
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
+            // Ctrl+click (Cmd on a Mac) opens the Pockets settings tab instead,
+            // as every Inventory Plus and Inventory Max button does.
+            if (Click.of(button).ctrl()) {
+                InventoryPlusApi.openSettings("inventorymax:pockets");
+                return true;
+            }
             int rev = PocketHoverState.revealedHotbar();
             if (rev < 0) return false;
             if (plus) {
