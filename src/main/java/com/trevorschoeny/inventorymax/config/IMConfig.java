@@ -42,11 +42,11 @@ public final class IMConfig {
     // Shared cycle HUD mode for pockets (None / Mini-hotbar). Default
     // MINI_HOTBAR, matching Column Cycler.
     private static PocketHudMode pocketHudMode = PocketHudMode.MINI_HOTBAR;
-    // Pockets as a search source for IP's Auto-Restock + Auto Tool Switch
-    // (the HotbarCyclableRegistry seam). Default ON — matches shipped
-    // behavior. OFF = pockets are storage only; nothing gets pulled out
-    // automatically. Read wherever the cyclable seam runs (client + server).
-    private static boolean pocketsSupplyAutomation = true;
+    // "Pockets supply automation" is gone (Reach build stage 4): whether
+    // Restock or Auto Tool Switch may take from pockets is the Pockets box in
+    // their reach, in Inventory Plus's Reach tab. A player who had it off gets
+    // those boxes cleared once, on upgrade (InventoryMaxClient).
+    private static @org.jetbrains.annotations.Nullable Boolean legacyPocketsSupplyAutomation;
     // Equipment Slots (elytra + totem) master toggle. Default ON. OFF hides
     // the slots (content persists, inert — same model as a 0-count pocket
     // column) and disarms the slot behaviors: glide, totem-fires-last,
@@ -58,10 +58,10 @@ public final class IMConfig {
     // The elytra/totem HUD cue icons beside the hotbar (sub of Equipment
     // Slots). Default ON — matches shipped behavior.
     private static boolean equipmentHudCue = true;
-    // Container Locks master toggle. Default ON. OFF = stored locks stay
-    // saved but stop being enforced/shown; flipping back ON re-arms them.
-    // Read at the ContainerLocks chokepoints (client UI + server mixins).
-    private static boolean containerLocksEnabled = true;
+    // Container locks: the old master toggle is gone (Reach build stage 4).
+    // Whether a player's container locks are also kept on the server is that
+    // player's choice, Inventory Plus's "Also keep container locks on the
+    // server"; the server enforces whatever the shared channel holds.
     // "Mend any item in the inventory" — ambient XP mending across the whole
     // vanilla inventory, not just equipped/registered. Default ON (the feature is
     // the point; equip + pocket mending are separate always-on slot opt-ins).
@@ -95,6 +95,9 @@ public final class IMConfig {
             String json = Files.readString(path);
             JsonObject root = JsonParser.parseString(json).getAsJsonObject();
             apply(root);
+            if (root.has("pocketsSupplyAutomation")) {
+                legacyPocketsSupplyAutomation = readBool(root, "pocketsSupplyAutomation", true);
+            }
             InventoryMax.LOGGER.info("[config] loaded from {}", path);
         } catch (IOException | JsonSyntaxException | IllegalStateException e) {
             InventoryMax.LOGGER.error("[config] failed to read {} — using defaults", path, e);
@@ -105,10 +108,8 @@ public final class IMConfig {
     private static void apply(JsonObject root) {
         pocketCyclerEnabled = readBool(root, "pocketCyclerEnabled", pocketCyclerEnabled);
         pocketHudMode = PocketHudMode.fromName(readString(root, "pocketHudMode", null), pocketHudMode);
-        pocketsSupplyAutomation = readBool(root, "pocketsSupplyAutomation", pocketsSupplyAutomation);
         equipmentSlotsEnabled = readBool(root, "equipmentSlotsEnabled", equipmentSlotsEnabled);
         equipmentHudCue = readBool(root, "equipmentHudCue", equipmentHudCue);
-        containerLocksEnabled = readBool(root, "containerLocksEnabled", containerLocksEnabled);
         mendInventoryItems = readBool(root, "mendInventoryItems", mendInventoryItems);
     }
 
@@ -144,10 +145,8 @@ public final class IMConfig {
         JsonObject root = new JsonObject();
         root.addProperty("pocketCyclerEnabled", pocketCyclerEnabled);
         root.addProperty("pocketHudMode", pocketHudMode.name());
-        root.addProperty("pocketsSupplyAutomation", pocketsSupplyAutomation);
         root.addProperty("equipmentSlotsEnabled", equipmentSlotsEnabled);
         root.addProperty("equipmentHudCue", equipmentHudCue);
-        root.addProperty("containerLocksEnabled", containerLocksEnabled);
         root.addProperty("mendInventoryItems", mendInventoryItems);
         return root;
     }
@@ -171,8 +170,20 @@ public final class IMConfig {
     public static PocketHudMode pocketHudMode() { return pocketHudMode; }
     public static void setPocketHudMode(PocketHudMode v) { pocketHudMode = v; save(); }
 
-    public static boolean pocketsSupplyAutomation() { return pocketsSupplyAutomation; }
-    public static void setPocketsSupplyAutomation(boolean v) { pocketsSupplyAutomation = v; save(); }
+    /**
+     * The removed "pockets supply automation" setting as the file last held
+     * it, or {@code null} when the file never had it. For the one-time upgrade
+     * into Reach; {@link #forgetLegacy} drops it from the file.
+     */
+    public static @org.jetbrains.annotations.Nullable Boolean legacyPocketsSupplyAutomation() {
+        return legacyPocketsSupplyAutomation;
+    }
+
+    /** Rewrites the file without the removed settings, so an upgrade runs once. */
+    public static void forgetLegacy() {
+        legacyPocketsSupplyAutomation = null;
+        save();
+    }
 
     public static boolean equipmentSlotsEnabled() { return equipmentSlotsEnabled; }
     public static void setEquipmentSlotsEnabled(boolean v) { equipmentSlotsEnabled = v; save(); }
@@ -180,8 +191,6 @@ public final class IMConfig {
     public static boolean equipmentHudCue() { return equipmentHudCue; }
     public static void setEquipmentHudCue(boolean v) { equipmentHudCue = v; save(); }
 
-    public static boolean containerLocksEnabled() { return containerLocksEnabled; }
-    public static void setContainerLocksEnabled(boolean v) { containerLocksEnabled = v; save(); }
 
     public static boolean mendInventoryItems() { return mendInventoryItems; }
     public static void setMendInventoryItems(boolean v) { mendInventoryItems = v; save(); }

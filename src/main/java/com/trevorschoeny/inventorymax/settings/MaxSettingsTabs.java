@@ -83,13 +83,11 @@ public final class MaxSettingsTabs {
                         + "and keys to cycle through them.",
                         IMConfig::pocketCyclerEnabled, IMConfig::setPocketCyclerEnabled,
                         () -> {
-                            IMConfig.reset("pocketCyclerEnabled", "pocketsSupplyAutomation", "pocketHudMode");
+                            IMConfig.reset("pocketCyclerEnabled", "pocketHudMode");
                             resetKeys(IMKeybinds.CYCLE_FORWARD, IMKeybinds.CYCLE_BACKWARD);
                         })
                 .heading("Misc.")
                 .placeholderCheckbox("Show the Pockets button")
-                .checkbox("Restock and Auto Tool Switch may take from pockets",
-                        IMConfig::pocketsSupplyAutomation, IMConfig::setPocketsSupplyAutomation, () -> false)
                 .choice("Beside the hotbar", Arrays.asList(PocketHudMode.values()),
                         m -> m == PocketHudMode.NONE ? "Off" : "Mini hotbar",
                         IMConfig::pocketHudMode, IMConfig::setPocketHudMode, () -> false)

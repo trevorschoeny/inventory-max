@@ -15,9 +15,16 @@ import com.trevorschoeny.inventorymax.pocket.PocketHover;
 import com.trevorschoeny.inventorymax.pocket.PocketInput;
 import com.trevorschoeny.inventorymax.pocket.PocketPixelPanels;
 import com.trevorschoeny.inventorymax.pocket.PocketState;
+import com.trevorschoeny.inventorymax.pocket.Pockets;
+import com.trevlar.menukit.core.MKCSlots;
+import com.trevlar.menukit.inject.SlotGroupId;
 import com.trevorschoeny.inventorymax.settings.MaxSettingsTabs;
 
 import net.fabricmc.api.ClientModInitializer;
+
+import java.util.ArrayList;
+import java.util.List;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
 /**
@@ -47,6 +54,10 @@ public class InventoryMaxClient implements ClientModInitializer {
         // Pockets, Equipment Slots and Mend Anywhere tabs in Inventory Plus's
         // settings menu, replacing its stand-ins.
         MaxSettingsTabs.register();
+        // A player who had "pockets supply automation" off keeps that: the
+        // Pockets box comes off Restock's and Auto Tool Switch's reach, once.
+        // After every client init, so Inventory Plus has read its reach first.
+        ClientLifecycleEvents.CLIENT_STARTED.register(client -> upgradePocketSupply());
         PocketState.load();
         PocketInput.register();
         // Contribute pockets to IP's shared cycle HUD (the generalization
@@ -76,5 +87,26 @@ public class InventoryMaxClient implements ClientModInitializer {
         InventoryPlusApi.registerSlotLockProvider(new ContainerLockProvider());
 
         InventoryMax.LOGGER.info("[inventorymax] Client init — Pocket Cycler + Container Locks active.");
+    }
+
+    /**
+     * "Pockets supply automation" was a switch of its own until the Reach
+     * build; it is now the Pockets box in Restock's and Auto Tool Switch's
+     * reach. A file that still has it off clears those boxes, then forgets it.
+     */
+    private static void upgradePocketSupply() {
+        Boolean legacy = IMConfig.legacyPocketsSupplyAutomation();
+        if (legacy == null) return;
+        if (!legacy) {
+            List<SlotGroupId> pockets = new ArrayList<>();
+            for (int n = 0; n < Pockets.HOTBAR_SLOTS; n++) {
+                for (int d = 0; d < Pockets.MAX_PER_SLOT; d++) {
+                    pockets.add(MKCSlots.groupId(Pockets.panelId(n, d), Pockets.groupId(n, d)));
+                }
+            }
+            InventoryPlusApi.denyInReach(InventoryPlusOperations.RESTOCK_TAKE, pockets);
+            InventoryPlusApi.denyInReach(InventoryPlusOperations.AUTO_TOOL_SWITCH, pockets);
+        }
+        IMConfig.forgetLegacy();
     }
 }

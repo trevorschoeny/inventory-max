@@ -1,6 +1,5 @@
 package com.trevorschoeny.inventorymax.containerlocks;
 
-import com.trevorschoeny.inventorymax.config.IMConfig;
 
 import com.mojang.serialization.Codec;
 import com.trevlar.menukit.core.MKSlotState;
@@ -77,7 +76,6 @@ public final class ContainerLocks {
      * paths; the client UI uses {@link ContainerLockProvider} instead.
      */
     public static boolean handles(Container container) {
-        if (!IMConfig.containerLocksEnabled()) return false; // feature off → locks dormant
         return container instanceof ChestBlockEntity
                 || container instanceof BarrelBlockEntity
                 || container instanceof ShulkerBoxBlockEntity
@@ -136,7 +134,6 @@ public final class ContainerLocks {
      * by definition, and a null acting player is a safe block.
      */
     public static boolean enforceForActingPlayer() {
-        if (!IMConfig.containerLocksEnabled()) return false; // feature off → nothing binds
         Player p = ACTING_PLAYER.get();
         if (p instanceof ServerPlayer sp) {
             return MKSlotState.isSlotStateCapable(sp);
