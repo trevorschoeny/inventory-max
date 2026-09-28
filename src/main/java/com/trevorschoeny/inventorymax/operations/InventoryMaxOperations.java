@@ -9,13 +9,16 @@ import com.trevlar.menukit.window.TriBool;
 
 import net.minecraft.resources.Identifier;
 
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Inventory Max's own slot operation, Pocket Cycler
  * ({@code plans/slot-operations.md}), and the recipe it is built with.
  *
- * <p>Common code, safe on a dedicated server: it names MenuKit types only. The
- * restock and Auto Tool Switch operations a pocket move can also serve belong
- * to Inventory Plus; see {@link ServedOperation} for how the server names them.
+ * <p>Common code, safe on a dedicated server: it names MenuKit types only. A
+ * pocket move can also serve another mod's operation (Inventory Plus's restock
+ * or Auto Tool Switch); the packet names it by id and the server looks it up in
+ * MenuKit with {@link #served}, which is why no copy of those keys lives here.
  */
 public final class InventoryMaxOperations {
 
@@ -30,6 +33,18 @@ public final class InventoryMaxOperations {
      */
     public static void define() {
         SlotOperations.define(POCKET_CYCLE, Role.BOTH);
+    }
+
+    /**
+     * The operation a pocket packet names, as the server knows it: any operation
+     * some mod defined, typed as the allow/deny kind every slot operation is.
+     * {@code null} for an id nobody defined, or of another type; the caller
+     * drops the packet rather than guess (never read as Pocket Cycler).
+     */
+    @SuppressWarnings("unchecked")
+    public static @Nullable BehaviorKey<TriBool> served(Identifier id) {
+        BehaviorKey<?> key = SlotOperations.byId(id);
+        return key != null && key.valueType() == TriBool.class ? (BehaviorKey<TriBool>) key : null;
     }
 
     /**

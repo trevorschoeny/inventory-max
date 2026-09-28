@@ -5,7 +5,6 @@ import com.trevorschoeny.inventoryplus.api.CyclerOperation;
 import com.trevorschoeny.inventoryplus.api.HotbarCyclable;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.operations.InventoryMaxOperations;
-import com.trevorschoeny.inventorymax.operations.ServedOperation;
 import com.trevlar.menukit.window.BehaviorKey;
 import com.trevlar.menukit.window.TriBool;
 import net.minecraft.client.Minecraft;
@@ -149,8 +148,7 @@ public final class PocketCyclable implements HotbarCyclable {
         // The same judgement Inventory Plus asks before choosing this pocket as a
         // source, so a pocket it chose is one this bring will run for.
         if (!allowsBringToHotbar(slot, take, put)) return CyclerOperation.NO_OP;
-        ServedOperation op = ServedOperation.servingFor(take, put);
-        rotate(hotbar, count, forward, steps, op);
+        rotate(hotbar, count, forward, steps, take, put);
         // Undo: same step count, opposite direction. Capture the parameters so
         // the reversal doesn't depend on (possibly drifted) current state —
         // matches the CyclerOperation drift-tolerance contract.
@@ -158,7 +156,7 @@ public final class PocketCyclable implements HotbarCyclable {
         final int undoCount = count;
         final int undoSteps = steps;
         final boolean undoForward = !forward;
-        return () -> rotate(undoHotbar, undoCount, undoForward, undoSteps, op);
+        return () -> rotate(undoHotbar, undoCount, undoForward, undoSteps, take, put);
     }
 
     @Override
@@ -186,8 +184,7 @@ public final class PocketCyclable implements HotbarCyclable {
         // shift-click would, then syncs the result back. No hotbar slot
         // changes here (the content leaves the pocket for its destination), so
         // unlike bringToHotbar there's no Auto-Restock slot to re-baseline.
-        ClientPlayNetworking.send(new PocketQuickMoveC2S(hotbarOf(slot), depthOf(slot),
-                ServedOperation.servingFor(take, put)));
+        ClientPlayNetworking.send(new PocketQuickMoveC2S(hotbarOf(slot), depthOf(slot), take.id(), put.id()));
         return true;
     }
 
@@ -230,10 +227,11 @@ public final class PocketCyclable implements HotbarCyclable {
      * swapped-in tool as a damage / run-out event. (See the class javadoc for
      * why pockets need this and Column Cycler doesn't.)
      */
-    private static void rotate(int hotbar, int count, boolean forward, int steps, ServedOperation op) {
+    private static void rotate(int hotbar, int count, boolean forward, int steps,
+                               BehaviorKey<TriBool> take, BehaviorKey<TriBool> put) {
         InventoryPlusApi.suppressRestockFor(hotbar);
         for (int i = 0; i < steps; i++) {
-            ClientPlayNetworking.send(new PocketRotateC2S(hotbar, count, forward, op));
+            ClientPlayNetworking.send(new PocketRotateC2S(hotbar, count, forward, take.id(), put.id()));
         }
     }
 }

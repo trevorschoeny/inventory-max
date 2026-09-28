@@ -5,7 +5,6 @@ import com.trevorschoeny.inventoryplus.api.CyclerDirection;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.config.IMKeybinds;
 import com.trevorschoeny.inventorymax.operations.InventoryMaxOperations;
-import com.trevorschoeny.inventorymax.operations.ServedOperation;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -81,7 +80,8 @@ public final class PocketInput {
         // wrap to an empty pocket reads as "held item ran out" and it switches
         // the selected slot to a backup stack.
         InventoryPlusApi.suppressRestockFor(hotbar);
-        ClientPlayNetworking.send(new PocketRotateC2S(hotbar, count, forward, ServedOperation.POCKET_CYCLE));
+        ClientPlayNetworking.send(new PocketRotateC2S(hotbar, count, forward,
+                InventoryMaxOperations.POCKET_CYCLE.id(), InventoryMaxOperations.POCKET_CYCLE.id()));
         // Predict the rotation locally so the HUD animation is drawn against the
         // post-rotation arrangement (the rotation is server-authoritative and
         // arrives a round-trip later — without this the animation desyncs).

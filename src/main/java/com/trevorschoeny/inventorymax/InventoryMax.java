@@ -1,5 +1,7 @@
 package com.trevorschoeny.inventorymax;
 
+import com.trevlar.menukit.window.TriBool;
+import com.trevlar.menukit.window.BehaviorKey;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.containerlocks.ContainerLocks;
 import com.trevorschoeny.inventorymax.equipment.EquipmentSlots;
@@ -85,8 +87,13 @@ public class InventoryMax implements ModInitializer {
             ServerPlayer sp = context.player();
             MinecraftServer server = sp.level().getServer();
             if (server != null) {
+                // The operation is named by id; one no mod defined drops the
+                // packet rather than being read as some other operation.
+                BehaviorKey<TriBool> take = InventoryMaxOperations.served(payload.take());
+                BehaviorKey<TriBool> put = InventoryMaxOperations.served(payload.put());
+                if (take == null || put == null) return;
                 server.execute(() -> PocketServerOps.rotate(
-                        sp, payload.hotbar(), payload.count(), payload.forward(), payload.op()));
+                        sp, payload.hotbar(), payload.count(), payload.forward(), take, put));
             }
         });
         ServerPlayNetworking.registerGlobalReceiver(PocketEvictC2S.TYPE, (payload, context) -> {
@@ -101,8 +108,11 @@ public class InventoryMax implements ModInitializer {
             ServerPlayer sp = context.player();
             MinecraftServer server = sp.level().getServer();
             if (server != null) {
+                BehaviorKey<TriBool> take = InventoryMaxOperations.served(payload.take());
+                BehaviorKey<TriBool> put = InventoryMaxOperations.served(payload.put());
+                if (take == null || put == null) return;
                 server.execute(() -> PocketServerOps.quickMove(
-                        sp, payload.hotbar(), payload.depth(), payload.op()));
+                        sp, payload.hotbar(), payload.depth(), take, put));
             }
         });
 

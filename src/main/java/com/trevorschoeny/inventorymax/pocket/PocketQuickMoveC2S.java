@@ -1,6 +1,5 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevorschoeny.inventorymax.operations.ServedOperation;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -27,11 +26,14 @@ import net.minecraft.resources.Identifier;
  * (rotate-into-hand) path via {@link PocketCyclable#bringToHotbar}. This is only
  * for slots the player isn't holding (totem, armor, offhand).
  *
- * <p>{@code op} is the operation the move serves (a restock, in practice). The
- * server asks it about the pocket before moving and runs the quick-move under it,
- * so MenuKit judges the destination as that operation rather than a shift-click.
+ * <p>{@code take} and {@code put} name the operation the move serves by id (a
+ * restock, in practice). The server looks each up in MenuKit, asks {@code take}
+ * about the pocket before moving and runs the quick-move under both, so MenuKit
+ * judges the destination as that operation rather than a shift-click; an id it
+ * does not know drops the packet.
  */
-public record PocketQuickMoveC2S(int hotbar, int depth, ServedOperation op) implements CustomPacketPayload {
+public record PocketQuickMoveC2S(int hotbar, int depth, Identifier take, Identifier put)
+        implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<PocketQuickMoveC2S> TYPE =
             new CustomPacketPayload.Type<>(
@@ -42,10 +44,11 @@ public record PocketQuickMoveC2S(int hotbar, int depth, ServedOperation op) impl
                     (buf, p) -> {
                         buf.writeVarInt(p.hotbar);
                         buf.writeVarInt(p.depth);
-                        buf.writeVarInt(p.op.toWire());
+                        Identifier.STREAM_CODEC.encode(buf, p.take);
+                        Identifier.STREAM_CODEC.encode(buf, p.put);
                     },
                     buf -> new PocketQuickMoveC2S(buf.readVarInt(), buf.readVarInt(),
-                            ServedOperation.fromWire(buf.readVarInt())));
+                            Identifier.STREAM_CODEC.decode(buf), Identifier.STREAM_CODEC.decode(buf)));
 
     @Override
     public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {

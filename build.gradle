@@ -41,6 +41,8 @@ repositories {
 // dependency sees only main, so its client half is added below by output,
 // which needs MenuKit evaluated first. A published jar holds both halves.
 evaluationDependsOn(':menukit')
+// Inventory Plus is split the same way (§0062); its client half comes by output too.
+evaluationDependsOn(':inventory-plus')
 
 dependencies {
     // 26.x: the game is unobfuscated — no mappings line, and mod deps use the
@@ -71,6 +73,7 @@ dependencies {
     // (HotbarCyclableRegistry, CycleHudRegistry, CycleView, HudMode) and
     // reads IPConfig for cohabitation flags. Dependency is one-way (IM→IP).
     implementation project(':inventory-plus')
+    implementation rootProject.project(':inventory-plus').sourceSets.client.output
 
     // Keybindery — required (Trev, 2026-09-27): the settings menu binds keys
     // with its MenuKit ChordButton, the same chord capture and conflict view

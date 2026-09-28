@@ -1,7 +1,5 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevorschoeny.inventorymax.operations.ServedOperation;
-
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -23,12 +21,13 @@ import net.minecraft.resources.Identifier;
  * hotbar slot (the server doesn't track it). Trusting it is harmless — it only
  * bounds which pocket slots participate in the rotation.
  *
- * <p>{@code op} is the operation the rotation serves: the pocket's own cycle, or
- * a restock or tool switch reaching a pocket. The server asks
- * {@code SlotOperations.allows} for it on every ring slot before rotating
- * ({@link com.trevorschoeny.inventorymax.operations.ServedOperation}).
+ * <p>{@code take} and {@code put} name the operation the rotation serves by id:
+ * the pocket's own cycle, or a restock or tool switch reaching a pocket (a
+ * restock takes and puts under different operations). The server looks each up
+ * in MenuKit and asks {@code SlotOperations.allows} for it on every ring slot
+ * before rotating; an id it does not know drops the packet.
  */
-public record PocketRotateC2S(int hotbar, int count, boolean forward, ServedOperation op)
+public record PocketRotateC2S(int hotbar, int count, boolean forward, Identifier take, Identifier put)
         implements CustomPacketPayload {
 
     public static final CustomPacketPayload.Type<PocketRotateC2S> TYPE =
@@ -41,10 +40,11 @@ public record PocketRotateC2S(int hotbar, int count, boolean forward, ServedOper
                         buf.writeVarInt(p.hotbar);
                         buf.writeVarInt(p.count);
                         buf.writeBoolean(p.forward);
-                        buf.writeVarInt(p.op.toWire());
+                        Identifier.STREAM_CODEC.encode(buf, p.take);
+                        Identifier.STREAM_CODEC.encode(buf, p.put);
                     },
                     buf -> new PocketRotateC2S(buf.readVarInt(), buf.readVarInt(), buf.readBoolean(),
-                            ServedOperation.fromWire(buf.readVarInt())));
+                            Identifier.STREAM_CODEC.decode(buf), Identifier.STREAM_CODEC.decode(buf)));
 
     @Override
     public CustomPacketPayload.Type<? extends CustomPacketPayload> type() {
