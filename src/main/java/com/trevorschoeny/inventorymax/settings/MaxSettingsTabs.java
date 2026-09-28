@@ -1,6 +1,7 @@
 package com.trevorschoeny.inventorymax.settings;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
+import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
 import com.trevorschoeny.inventorymax.config.IMKeybinds;
 import com.trevorschoeny.inventorymax.pocket.PocketHudMode;
 
@@ -14,7 +15,9 @@ import com.trevlar.menukit.core.Tabs;
 import com.trevlar.menukit.core.TextLabel;
 import com.trevlar.menukit.core.Toggle;
 
+import com.trevorschoeny.keybindery.api.KeybinderyAPI;
 import com.trevorschoeny.keybindery.chord.ChordButton;
+import com.trevorschoeny.keybindery.chord.IChordKeyMapping;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -35,8 +38,10 @@ import java.util.function.Supplier;
  * greyed stand-ins under the same ids; adding them here replaces those, in
  * the same places.
  *
- * <p>The two mods share only the menu's name and the three tab ids below;
- * Inventory Max imports nothing of Inventory Plus's for this.
+ * <p>The two mods share the menu's name and the three tab ids below, and two
+ * calls in Inventory Plus's {@code api}: the menu's confirm, which every
+ * Reset to Defaults asks through, and the hook General's Reset everything
+ * runs Inventory Max's resets by.
  *
  * <p>Half wired: a control with an {@code IMConfig} setting behind it reads
  * it every frame and saves on change; the rest (the inventory-button
@@ -54,6 +59,11 @@ public final class MaxSettingsTabs {
         add("inventorymax:pockets", "Pockets", MaxSettingsTabs::pockets);
         add("inventorymax:equipment_slots", "Equipment Slots", MaxSettingsTabs::equipmentSlots);
         add("inventorymax:mend_anywhere", "Mend Anywhere", MaxSettingsTabs::mendAnywhere);
+        // General's Reset everything reaches Inventory Max's settings too.
+        InventoryPlusApi.registerSettingsReset(() -> {
+            IMConfig.resetAll();
+            resetKeys(IMKeybinds.CYCLE_FORWARD, IMKeybinds.CYCLE_BACKWARD);
+        });
     }
 
     private static void add(String id, String label, Supplier<List<PanelElement>> body) {
@@ -71,7 +81,11 @@ public final class MaxSettingsTabs {
         return new Body()
                 .frame("Pockets", "Adds up to three extra slots behind each hotbar slot, "
                         + "and keys to cycle through them.",
-                        IMConfig::pocketCyclerEnabled, IMConfig::setPocketCyclerEnabled)
+                        IMConfig::pocketCyclerEnabled, IMConfig::setPocketCyclerEnabled,
+                        () -> {
+                            IMConfig.reset("pocketCyclerEnabled", "pocketsSupplyAutomation", "pocketHudMode");
+                            resetKeys(IMKeybinds.CYCLE_FORWARD, IMKeybinds.CYCLE_BACKWARD);
+                        })
                 .heading("Misc.")
                 .placeholderCheckbox("Show the Pockets button")
                 .checkbox("Restock and Auto Tool Switch may take from pockets",
@@ -88,7 +102,8 @@ public final class MaxSettingsTabs {
     private static List<PanelElement> equipmentSlots() {
         return new Body()
                 .frame("Equipment Slots", "Adds an elytra slot and a totem slot to your inventory.",
-                        IMConfig::equipmentSlotsEnabled, IMConfig::setEquipmentSlotsEnabled)
+                        IMConfig::equipmentSlotsEnabled, IMConfig::setEquipmentSlotsEnabled,
+                        () -> IMConfig.reset("equipmentSlotsEnabled", "equipmentHudCue"))
                 .heading("Misc.")
                 .placeholderCheckbox("Show the Equipment Slots button")
                 .checkbox("Show elytra and totem icons beside the hotbar",
@@ -100,10 +115,18 @@ public final class MaxSettingsTabs {
         return new Body()
                 .frame("Mend Anywhere", "Mending items repair from XP anywhere in your inventory, "
                         + "not only in your hands and armor.",
-                        IMConfig::mendInventoryItems, IMConfig::setMendInventoryItems)
+                        IMConfig::mendInventoryItems, IMConfig::setMendInventoryItems,
+                        () -> IMConfig.reset("mendInventoryItems"))
                 .heading("Misc.")
                 .placeholderCheckbox("Show the Mend Anywhere button")
                 .build();
+    }
+
+    /** Puts {@code keys} back to their default binding, through Keybindery as the key buttons do. */
+    private static void resetKeys(KeyMapping... keys) {
+        for (KeyMapping key : keys) {
+            KeybinderyAPI.getInstance().setChord(key, IChordKeyMapping.defaultChord(key));
+        }
     }
 
     // ── Rows ────────────────────────────────────────────────────────────
@@ -124,10 +147,12 @@ public final class MaxSettingsTabs {
 
         /**
          * The frame: the title at twice size; the description; the
-         * feature's on/off toggle, reading "On" or "Off", with Reset to Defaults (greyed until
-         * reset is built) to its right; then a line.
+         * feature's on/off toggle, reading "On" or "Off", with Reset to Defaults
+         * to its right, which asks first through Inventory Plus's menu and
+         * then runs {@code reset}; then a line.
          */
-        Body frame(String title, String description, BooleanSupplier on, Consumer<Boolean> setOn) {
+        Body frame(String title, String description, BooleanSupplier on, Consumer<Boolean> setOn,
+                   Runnable reset) {
             out.add(new TextLabel(0, y, Component.literal(title), TextLabel.COLOR_DARK, false).scale(2f));
             y += 24;
             out.add(new TextLabel(0, y, Component.literal(description), TEXT, false));
@@ -136,7 +161,10 @@ public final class MaxSettingsTabs {
                     Toggle.linked(0, 0, 40, 16, on, setOn, null)
                             .label(() -> Component.literal(on.getAsBoolean() ? "On" : "Off")),
                     new Button(0, 0, Minecraft.getInstance().font.width("Reset to Defaults") + 12, 16,
-                            Component.literal("Reset to Defaults"), b -> {}, DISABLED)))
+                            Component.literal("Reset to Defaults"),
+                            b -> InventoryPlusApi.confirmInSettings("Reset " + title + " to defaults?",
+                                    "Every setting and key on this tab goes back to how a fresh install has it.",
+                                    reset))))
                     .gap(10, 4).at(0, y));
             y += 22;
             featureOn = on;

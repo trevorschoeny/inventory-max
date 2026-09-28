@@ -68,6 +68,13 @@ public final class IMConfig {
     // Gates only the vanilla-inventory mend provider, read server-side.
     private static boolean mendInventoryItems = true;
 
+    /**
+     * Every setting at its default, taken before the file is read, so a tab's
+     * Reset to Defaults ({@link #reset}) never restates a default by hand.
+     * Declared after every field, so each is at its default here.
+     */
+    private static final JsonObject DEFAULTS = settingsJson();
+
     private static boolean loaded = false;
 
     private static Path filePath() {
@@ -87,17 +94,39 @@ public final class IMConfig {
         try {
             String json = Files.readString(path);
             JsonObject root = JsonParser.parseString(json).getAsJsonObject();
-            pocketCyclerEnabled = readBool(root, "pocketCyclerEnabled", pocketCyclerEnabled);
-            pocketHudMode = PocketHudMode.fromName(readString(root, "pocketHudMode", null), pocketHudMode);
-            pocketsSupplyAutomation = readBool(root, "pocketsSupplyAutomation", pocketsSupplyAutomation);
-            equipmentSlotsEnabled = readBool(root, "equipmentSlotsEnabled", equipmentSlotsEnabled);
-            equipmentHudCue = readBool(root, "equipmentHudCue", equipmentHudCue);
-            containerLocksEnabled = readBool(root, "containerLocksEnabled", containerLocksEnabled);
-            mendInventoryItems = readBool(root, "mendInventoryItems", mendInventoryItems);
+            apply(root);
             InventoryMax.LOGGER.info("[config] loaded from {}", path);
         } catch (IOException | JsonSyntaxException | IllegalStateException e) {
             InventoryMax.LOGGER.error("[config] failed to read {} — using defaults", path, e);
         }
+    }
+
+    /** Reads every setting {@code root} has; the rest keep their values. */
+    private static void apply(JsonObject root) {
+        pocketCyclerEnabled = readBool(root, "pocketCyclerEnabled", pocketCyclerEnabled);
+        pocketHudMode = PocketHudMode.fromName(readString(root, "pocketHudMode", null), pocketHudMode);
+        pocketsSupplyAutomation = readBool(root, "pocketsSupplyAutomation", pocketsSupplyAutomation);
+        equipmentSlotsEnabled = readBool(root, "equipmentSlotsEnabled", equipmentSlotsEnabled);
+        equipmentHudCue = readBool(root, "equipmentHudCue", equipmentHudCue);
+        containerLocksEnabled = readBool(root, "containerLocksEnabled", containerLocksEnabled);
+        mendInventoryItems = readBool(root, "mendInventoryItems", mendInventoryItems);
+    }
+
+    /** Puts the settings named in {@code keys} back to their defaults and saves. */
+    public static void reset(String... keys) {
+        JsonObject part = new JsonObject();
+        for (String key : keys) {
+            if (!DEFAULTS.has(key)) throw new IllegalArgumentException("[config] no setting " + key);
+            part.add(key, DEFAULTS.get(key));
+        }
+        apply(part);
+        save();
+    }
+
+    /** Every setting back to its default, and saves: the settings menu's Reset everything. */
+    public static void resetAll() {
+        apply(DEFAULTS);
+        save();
     }
 
     private static boolean readBool(JsonObject root, String key, boolean fallback) {
@@ -110,19 +139,26 @@ public final class IMConfig {
                 ? root.get(key).getAsString() : fallback;
     }
 
+    /** Every setting as the file writes it, without the version. */
+    private static JsonObject settingsJson() {
+        JsonObject root = new JsonObject();
+        root.addProperty("pocketCyclerEnabled", pocketCyclerEnabled);
+        root.addProperty("pocketHudMode", pocketHudMode.name());
+        root.addProperty("pocketsSupplyAutomation", pocketsSupplyAutomation);
+        root.addProperty("equipmentSlotsEnabled", equipmentSlotsEnabled);
+        root.addProperty("equipmentHudCue", equipmentHudCue);
+        root.addProperty("containerLocksEnabled", containerLocksEnabled);
+        root.addProperty("mendInventoryItems", mendInventoryItems);
+        return root;
+    }
+
     private static void save() {
         Path path = filePath();
         try {
             Files.createDirectories(path.getParent());
             JsonObject root = new JsonObject();
             root.addProperty("version", CURRENT_VERSION);
-            root.addProperty("pocketCyclerEnabled", pocketCyclerEnabled);
-            root.addProperty("pocketHudMode", pocketHudMode.name());
-            root.addProperty("pocketsSupplyAutomation", pocketsSupplyAutomation);
-            root.addProperty("equipmentSlotsEnabled", equipmentSlotsEnabled);
-            root.addProperty("equipmentHudCue", equipmentHudCue);
-            root.addProperty("containerLocksEnabled", containerLocksEnabled);
-            root.addProperty("mendInventoryItems", mendInventoryItems);
+            settingsJson().entrySet().forEach(e -> root.add(e.getKey(), e.getValue()));
             Files.writeString(path, GSON.toJson(root));
         } catch (IOException e) {
             InventoryMax.LOGGER.error("[config] failed to write {} — changes won't persist", path, e);
