@@ -2,8 +2,8 @@ package com.trevorschoeny.inventorymax.containerlocks;
 
 
 import com.mojang.serialization.Codec;
-import com.trevlar.menukit.core.MKSlotState;
-import com.trevlar.menukit.core.SlotStateChannel;
+import com.trevlar.menukit.containers.core.MKSlotState;
+import com.trevlar.menukit.containers.core.SlotStateChannel;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;

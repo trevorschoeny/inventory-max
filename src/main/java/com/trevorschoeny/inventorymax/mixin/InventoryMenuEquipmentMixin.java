@@ -3,7 +3,7 @@ package com.trevorschoeny.inventorymax.mixin;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.equipment.EquipmentSlots;
 import com.trevorschoeny.inventorymax.pocket.SliceStorage;
-import com.trevlar.menukit.core.MKCSlots;
+import com.trevlar.menukit.containers.core.MKCSlots;
 import com.trevlar.menukit.core.Storage;
 
 import net.minecraft.world.entity.player.Inventory;

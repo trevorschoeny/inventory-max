@@ -1,6 +1,6 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevlar.menukit.core.MKCSlot;
+import com.trevlar.menukit.containers.core.MKCSlot;
 import com.trevlar.menukit.window.BehaviorKey;
 import com.trevlar.menukit.window.SlotOperations;
 import com.trevlar.menukit.window.TriBool;

@@ -1,7 +1,7 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevlar.menukit.core.MKCSlot;
-import com.trevlar.menukit.core.MKCSlotAccess;
+import com.trevlar.menukit.containers.core.MKCSlot;
+import com.trevlar.menukit.containers.core.MKCSlotAccess;
 import com.trevlar.menukit.inject.SlotScreenRect;
 import com.trevlar.menukit.inject.VanillaSlotResolver;
 

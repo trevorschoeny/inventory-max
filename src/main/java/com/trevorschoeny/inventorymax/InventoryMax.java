@@ -10,7 +10,7 @@ import com.trevorschoeny.inventorymax.pocket.PocketQuickMoveC2S;
 import com.trevorschoeny.inventorymax.pocket.PocketRotateC2S;
 import com.trevorschoeny.inventorymax.pocket.PocketServerOps;
 import com.trevorschoeny.inventorymax.pocket.Pockets;
-import com.trevlar.menukit.core.MendingCandidates;
+import com.trevlar.menukit.containers.core.MendingCandidates;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;

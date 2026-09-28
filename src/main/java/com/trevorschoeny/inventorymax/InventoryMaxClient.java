@@ -16,7 +16,7 @@ import com.trevorschoeny.inventorymax.pocket.PocketInput;
 import com.trevorschoeny.inventorymax.pocket.PocketPixelPanels;
 import com.trevorschoeny.inventorymax.pocket.PocketState;
 import com.trevorschoeny.inventorymax.pocket.Pockets;
-import com.trevlar.menukit.core.MKCSlots;
+import com.trevlar.menukit.containers.core.MKCSlots;
 import com.trevlar.menukit.inject.SlotGroupId;
 import com.trevorschoeny.inventorymax.settings.MaxSettingsTabs;
 

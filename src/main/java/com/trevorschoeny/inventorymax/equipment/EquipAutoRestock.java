@@ -3,7 +3,7 @@ package com.trevorschoeny.inventorymax.equipment;
 import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
 import com.trevorschoeny.inventoryplus.api.PlayerMenuSlots;
 import com.trevorschoeny.inventoryplus.api.InventoryPlusOperations;
-import com.trevlar.menukit.core.MKCSlot;
+import com.trevlar.menukit.containers.core.MKCSlot;
 import com.trevlar.menukit.window.SlotOperations;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;

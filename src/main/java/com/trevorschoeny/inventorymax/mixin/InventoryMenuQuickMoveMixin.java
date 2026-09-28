@@ -2,7 +2,7 @@ package com.trevorschoeny.inventorymax.mixin;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.equipment.EquipmentSlots;
-import com.trevlar.menukit.core.MKCSlot;
+import com.trevlar.menukit.containers.core.MKCSlot;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;

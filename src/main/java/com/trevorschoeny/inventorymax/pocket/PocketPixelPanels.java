@@ -8,7 +8,7 @@ import com.trevlar.menukit.core.PanelElement;
 import com.trevlar.menukit.core.PanelPosition;
 import com.trevlar.menukit.core.PanelStyle;
 import com.trevlar.menukit.core.RenderContext;
-import com.trevlar.menukit.core.SlotElement;
+import com.trevlar.menukit.containers.core.SlotElement;
 import com.trevlar.menukit.inject.ScreenOrigin;
 import com.trevlar.menukit.inject.ScreenPanelAdapter;
 import com.trevlar.menukit.inject.SlotScreenRect;

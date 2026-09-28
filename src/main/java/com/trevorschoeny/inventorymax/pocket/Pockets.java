@@ -1,12 +1,12 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevlar.menukit.core.CreatedSlotAdapter;
-import com.trevlar.menukit.core.MKCSlots;
+import com.trevlar.menukit.window.Address;
+import com.trevlar.menukit.containers.core.MKCSlots;
 import com.trevlar.menukit.core.SlotGroupCategory;
 import com.trevlar.menukit.inject.SlotGroupSet;
 import com.trevlar.menukit.inject.SlotGroups;
-import com.trevlar.menukit.core.MKCBehaviorKeys;
-import com.trevlar.menukit.core.StorageAttachment;
+import com.trevlar.menukit.containers.core.MKCBehaviorKeys;
+import com.trevlar.menukit.containers.core.StorageAttachment;
 import com.trevlar.menukit.window.TriBool;
 import com.trevlar.menukit.window.Window;
 
@@ -84,7 +84,7 @@ public final class Pockets {
         for (int n = 0; n < HOTBAR_SLOTS; n++) {
             for (int d = 0; d < MAX_PER_SLOT; d++) {
                 String g = groupId(n, d);
-                Window.slot(CreatedSlotAdapter.addressOf(panelId(n, d), g, 0))
+                Window.slot(Address.createdSlot(MKCSlots.groupId(panelId(n, d), g), 0))
                         .set(MKCBehaviorKeys.MENDING, TriBool.TRUE);
             }
         }

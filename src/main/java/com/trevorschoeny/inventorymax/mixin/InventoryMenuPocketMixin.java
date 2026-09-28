@@ -3,7 +3,7 @@ package com.trevorschoeny.inventorymax.mixin;
 import com.trevorschoeny.inventorymax.pocket.PocketHoverState;
 import com.trevorschoeny.inventorymax.pocket.Pockets;
 import com.trevorschoeny.inventorymax.pocket.SliceStorage;
-import com.trevlar.menukit.core.MKCSlots;
+import com.trevlar.menukit.containers.core.MKCSlots;
 import com.trevlar.menukit.core.SlotGroupCategory;
 import com.trevlar.menukit.core.Storage;
 
