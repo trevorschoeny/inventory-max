@@ -43,6 +43,8 @@ repositories {
 evaluationDependsOn(':menukit')
 // Inventory Plus is split the same way (§0062); its client half comes by output too.
 evaluationDependsOn(':inventory-plus')
+// Keybindery is universal the same way; its client half comes by output too.
+evaluationDependsOn(':keybindery')
 
 dependencies {
     // 26.x: the game is unobfuscated — no mappings line, and mod deps use the
@@ -77,8 +79,11 @@ dependencies {
 
     // Keybindery — required (Trev, 2026-09-27): the settings menu binds keys
     // with its MenuKit ChordButton, the same chord capture and conflict view
-    // as Keybindery's own screens.
+    // as Keybindery's own screens. Universal now (§0062): a project dep sees
+    // only its empty common entrypoint, so the real (client) code comes by
+    // output, same as MenuKit's and Inventory Plus's above.
     implementation project(':keybindery')
+    implementation rootProject.project(':keybindery').sourceSets.client.output
 }
 
 loom {
