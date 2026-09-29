@@ -1,14 +1,14 @@
 package com.trevorschoeny.inventorymax.equipment;
 
 import com.trevlar.menukit.core.SlotGroupCategory;
-import com.trevlar.menukit.containers.core.GatingContext;
 import com.trevlar.menukit.containers.core.MKCBehaviorKeys;
 import com.trevlar.menukit.containers.core.MKCSlots;
 import com.trevlar.menukit.inject.SlotGroups;
-import com.trevlar.menukit.containers.core.SlotGate;
 import com.trevlar.menukit.core.Storage;
 import com.trevlar.menukit.containers.core.StorageAttachment;
 import com.trevlar.menukit.window.Address;
+import com.trevlar.menukit.window.GatingContext;
+import com.trevlar.menukit.window.SlotGate;
 import com.trevlar.menukit.window.TriBool;
 import com.trevlar.menukit.window.Window;
 
@@ -144,12 +144,13 @@ public final class EquipmentSlots {
     /** GATING (filter + single item) + BINDING + MENDING on the group's one slot, by address. */
     private static void declare(String group, Predicate<ItemStack> accepts) {
         Address a = Address.createdSlot(MKCSlots.groupId(panelId(group), group), 0);
-        Window.slot(a).set(MKCBehaviorKeys.GATING, new SlotGate() {
-            @Override public boolean mayPlace(ItemStack stack, GatingContext ctx) { return accepts.test(stack); }
-            @Override public boolean mayPickup(Player player, GatingContext ctx) { return true; }
-            @Override public int maxStackSize(ItemStack stack, int vanillaMax) { return Math.min(1, vanillaMax); }
-        });
-        Window.slot(a).set(MKCBehaviorKeys.BINDING, TriBool.TRUE);
+        Window.slot(a)
+                .gate(new SlotGate() {
+                    @Override public boolean mayPlace(ItemStack stack, GatingContext ctx) { return accepts.test(stack); }
+                    @Override public boolean mayPickup(Player player, GatingContext ctx) { return true; }
+                    @Override public int maxStackSize(ItemStack stack, int vanillaMax) { return Math.min(1, vanillaMax); }
+                })
+                .binding(true);
         Window.slot(a).set(MKCBehaviorKeys.MENDING, TriBool.TRUE);
     }
 
