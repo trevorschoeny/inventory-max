@@ -15,8 +15,8 @@ import com.trevorschoeny.inventorymax.pocket.PocketInput;
 import com.trevorschoeny.inventorymax.pocket.PocketPixelPanels;
 import com.trevorschoeny.inventorymax.pocket.PocketState;
 import com.trevorschoeny.inventorymax.pocket.Pockets;
-import com.trevlar.menukit.containers.core.MKCSlots;
-import com.trevlar.menukit.inject.SlotGroupId;
+import com.trevlar.menukit.containers.api.slot.CreatedSlots;
+import com.trevlar.menukit.api.slot.SlotGroupId;
 import com.trevorschoeny.inventorymax.settings.MaxSettingsTabs;
 
 import net.fabricmc.api.ClientModInitializer;
@@ -94,7 +94,7 @@ public class InventoryMaxClient implements ClientModInitializer {
             List<SlotGroupId> pockets = new ArrayList<>();
             for (int n = 0; n < Pockets.HOTBAR_SLOTS; n++) {
                 for (int d = 0; d < Pockets.MAX_PER_SLOT; d++) {
-                    pockets.add(MKCSlots.groupId(Pockets.panelId(n, d), Pockets.groupId(n, d)));
+                    pockets.add(CreatedSlots.groupId(Pockets.panelId(n, d), Pockets.groupId(n, d)));
                 }
             }
             InventoryPlusApi.denyInReach(InventoryPlusOperations.RESTOCK_TAKE, pockets);

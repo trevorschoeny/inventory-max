@@ -2,16 +2,17 @@ package com.trevorschoeny.inventorymax.containerlocks;
 
 
 import com.mojang.serialization.Codec;
-import com.trevlar.menukit.containers.core.MKSlotState;
-import com.trevlar.menukit.containers.core.SlotStateChannel;
+import com.trevlar.menukit.containers.api.state.SlotState;
+import com.trevlar.menukit.containers.api.state.SlotStateChannel;
+import com.trevlar.menukit.api.window.BehaviorKey;
+import com.trevlar.menukit.api.window.BehaviorKeys;
+import com.trevlar.menukit.api.window.SlotOperations;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
@@ -19,7 +20,8 @@ import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 
-import org.jetbrains.annotations.Nullable;
+import java.util.Set;
+
 
 /**
  * Container Locks — the companion (IM) half of Inventory Plus's Locked Slots:
@@ -53,16 +55,45 @@ public final class ContainerLocks {
     /** SHARED boolean lock channel — one value per placed-container slot. */
     public static SlotStateChannel<Boolean> CHANNEL;
 
-    /** Registers the channel. Universal; call once at common init before any container menu opens. */
+    /**
+     * The vanilla operations a lock refuses: the {@code menukit:} part of
+     * Inventory Plus's Slot lock default ({@code Reach.SLOT_LOCK_DENIES}), so a
+     * placed-container lock means what a player-inventory lock means. The
+     * server keeps these locks as plain booleans with no group, so it holds the
+     * default; Inventory Plus's own operations (sort, restock) are judged on
+     * the locking player's client by its own veto. World pickup
+     * ({@code INVENTORY_INSERT}) is left out: it only fills the player's own
+     * inventory, never a placed container.
+     */
+    private static final Set<BehaviorKey<?>> LOCK_DENIES = Set.of(
+            BehaviorKeys.SHIFT_CLICK_IN, BehaviorKeys.SHIFT_CLICK_OUT, BehaviorKeys.COLLECT,
+            BehaviorKeys.DROP, BehaviorKeys.DROP_STACK,
+            BehaviorKeys.DRAG_FILL, BehaviorKeys.HOTBAR_SWAP, BehaviorKeys.OFFHAND_SWAP);
+
+    /**
+     * Registers the channel and the veto that enforces it. Universal; call once
+     * at common init before any container menu opens.
+     */
     public static void register() {
-        CHANNEL = MKSlotState.register(
+        CHANNEL = SlotState.register(
                 Identifier.fromNamespaceAndPath("inventoryplus", "container_lock"),
                 Codec.BOOL,
                 StreamCodec.<RegistryFriendlyByteBuf, Boolean>of(
                         (buf, v) -> buf.writeBoolean(v),
                         buf -> buf.readBoolean()),
                 false,
-                SlotStateChannel.Visibility.SHARED);
+                SlotStateChannel.Visibility.SHARED,
+                // A viewer of a placed simple-storage container may lock its
+                // slots; the server has already checked the menu, the slot and
+                // stillValid (MenuKit 6.0.0, §0067). Without a rule every
+                // client write to a SHARED channel reverts.
+                (player, slot) -> handles(slot.container()));
+        // One veto for every seam MenuKit asks it at (shift-click merge and
+        // destination, collect, clicks, swaps, drops), replacing the three
+        // lock mixins. On the client the open container is a SimpleContainer,
+        // which handles() refuses, so this binds where the real block entity is.
+        SlotOperations.veto((ref, operation) ->
+                LOCK_DENIES.contains(operation) && isLocked(ref.container(), ref.containerSlot()));
     }
 
     // ── Server-side recognition (real container types) ──────────────────────
@@ -87,13 +118,9 @@ public final class ContainerLocks {
     // ── Lock reads ──────────────────────────────────────────────────────────
 
     /**
-     * Lock check for the server-side shift-click enforcement mixin. Routes through
-     * the menu-free read ({@link #isLocked(Container, int)}), <b>not</b> the
-     * slot-based {@code CHANNEL.get(slot)}: the slot-based read derives the server
-     * from a resolvable viewer, and {@code moveItemStackTo} provides none for a
-     * placed container on the server thread, so it reads false. The menu-free read
-     * (§0050) derives the server from the container itself — correct here, and the
-     * same path the automation enforcement already uses successfully.
+     * Lock check for a slot. Routes through the menu-free read
+     * ({@link #isLocked(Container, int)}), which derives the server from the
+     * container itself (§0050), so it answers on the server thread too.
      */
     public static boolean isLocked(Slot slot) {
         return isLocked(slot.container, slot.getContainerSlot());
@@ -107,37 +134,5 @@ public final class ContainerLocks {
      */
     public static boolean isLocked(Container container, int slotIndex) {
         return handles(container) && CHANNEL.get(container, slotIndex);
-    }
-
-    // ── Non-modded bypass (§0050) — acting-player capability gate ────────────
-    //
-    // moveItemStackTo carries no player, so the click-capture mixin stashes the
-    // acting player here for the duration of a click; the enforcement mixin reads
-    // it to decide whether the lock binds this player. Automation has no player —
-    // machines always respect locks — so it never consults this.
-    private static final ThreadLocal<Player> ACTING_PLAYER = new ThreadLocal<>();
-
-    public static void setActingPlayer(@Nullable Player player) {
-        if (player != null) ACTING_PLAYER.set(player);
-    }
-
-    public static void clearActingPlayer() {
-        ACTING_PLAYER.remove();
-    }
-
-    /**
-     * True if a locked container slot should bind whoever is currently acting. A
-     * server player whose client can't receive slot-state sync (no MenuKit)
-     * bypasses the lock — they can't see it, so it doesn't wall them (Trev's call,
-     * §0050 {@code isSlotStateCapable}). Client prediction and programmatic moves
-     * (no captured {@link ServerPlayer}) enforce by default: the client is modded
-     * by definition, and a null acting player is a safe block.
-     */
-    public static boolean enforceForActingPlayer() {
-        Player p = ACTING_PLAYER.get();
-        if (p instanceof ServerPlayer sp) {
-            return MKSlotState.isSlotStateCapable(sp);
-        }
-        return true;
     }
 }

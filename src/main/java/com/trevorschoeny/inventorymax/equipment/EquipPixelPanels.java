@@ -1,19 +1,18 @@
 package com.trevorschoeny.inventorymax.equipment;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
-import com.trevlar.menukit.containers.core.MKCSlot;
-import com.trevlar.menukit.containers.core.MKCSlotAccess;
-import com.trevlar.menukit.containers.core.MKCSlots;
-import com.trevlar.menukit.core.Panel;
-import com.trevlar.menukit.core.PanelElement;
-import com.trevlar.menukit.core.PanelPosition;
-import com.trevlar.menukit.core.PanelStyle;
-import com.trevlar.menukit.core.RenderContext;
-import com.trevlar.menukit.containers.core.SlotElement;
-import com.trevlar.menukit.core.SlotRendering;
-import com.trevlar.menukit.inject.ScreenOrigin;
-import com.trevlar.menukit.inject.ScreenPanelAdapter;
-import com.trevlar.menukit.inject.VanillaSlotResolver;
+import com.trevlar.menukit.containers.api.slot.CreatedSlot;
+import com.trevlar.menukit.containers.api.slot.CreatedSlots;
+import com.trevlar.menukit.api.panel.Panel;
+import com.trevlar.menukit.api.element.PanelElement;
+import com.trevlar.menukit.api.panel.PanelPosition;
+import com.trevlar.menukit.api.panel.PanelStyle;
+import com.trevlar.menukit.api.element.RenderContext;
+import com.trevlar.menukit.containers.api.slot.SlotElement;
+import com.trevlar.menukit.api.element.SlotRendering;
+import com.trevlar.menukit.api.panel.ScreenOrigin;
+import com.trevlar.menukit.api.panel.ScreenPanelAdapter;
+import com.trevlar.menukit.api.slot.VanillaSlotResolver;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -74,7 +73,7 @@ public final class EquipPixelPanels {
                 .elements(List.of(
                         // Slot first, icon after — the icon draws over an empty
                         // slot's frame (the old foreground z-order).
-                        new SlotElement(dataPanel, group, 0, 0, 0),
+                        SlotElement.builder().slot(CreatedSlots.groupId(dataPanel, group), 0).build(),
                         new EmptyIcon(group)))
                 .visible(true)
                 // The SlotElement draws its own frame; no backing of ours.
@@ -108,15 +107,15 @@ public final class EquipPixelPanels {
             // 1px gap to the column, like the offhand's; pair top = column
             // midpoint minus one pitch, so the 36px pair straddles the middle
             // of the (possibly gapped) leggings→boots span.
-            int x = leggings.frameX() + MKCSlots.SLOT_PITCH + 1;
+            int x = leggings.frameX() + CreatedSlots.SLOT_PITCH + 1;
             int columnTop = leggings.frameY();
-            int columnBottom = boots.frameY() + MKCSlots.SLOT_PITCH;
-            int pairTop = (columnTop + columnBottom) / 2 - MKCSlots.SLOT_PITCH;
-            return new ScreenOrigin(x, pairTop + pairIndex * MKCSlots.SLOT_PITCH);
+            int columnBottom = boots.frameY() + CreatedSlots.SLOT_PITCH;
+            int pairTop = (columnTop + columnBottom) / 2 - CreatedSlots.SLOT_PITCH;
+            return new ScreenOrigin(x, pairTop + pairIndex * CreatedSlots.SLOT_PITCH);
         }
         return VanillaSlotResolver.resolve(screen, Inventory.SLOT_OFFHAND)
                 .map(offhand -> new ScreenOrigin(offhand.frameX(),
-                        offhand.frameY() - slotsAboveOffhand * MKCSlots.SLOT_PITCH))
+                        offhand.frameY() - slotsAboveOffhand * CreatedSlots.SLOT_PITCH))
                 .orElse(null);
     }
 
@@ -140,7 +139,7 @@ public final class EquipPixelPanels {
 
         @Override
         public void render(RenderContext ctx) {
-            MKCSlot mk = find(group);
+            CreatedSlot mk = find(group);
             if (mk == null || !mk.getItem().isEmpty()) return;
             Identifier sprite = EquipSlotIcons.spriteFor(group);
             if (sprite == null) return;
@@ -155,13 +154,13 @@ public final class EquipPixelPanels {
          * {@code SlotWrapper} on the creative inventory tab. Null when absent
          * (the panel is skipped there anyway; this is belt-and-braces).
          */
-        private static MKCSlot find(String group) {
+        private static CreatedSlot find(String group) {
             if (!(Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?> acs)) {
                 return null;
             }
             for (Slot s : acs.getMenu().slots) {
-                MKCSlot mk = MKCSlotAccess.asMKCSlot(s);
-                if (mk != null && group.equals(mk.getGroupId())) return mk;
+                CreatedSlot mk = CreatedSlot.of(s);
+                if (mk != null && group.equals(mk.groupId())) return mk;
             }
             return null;
         }

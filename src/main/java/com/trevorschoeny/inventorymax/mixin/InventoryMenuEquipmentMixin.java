@@ -3,8 +3,8 @@ package com.trevorschoeny.inventorymax.mixin;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.equipment.EquipmentSlots;
 import com.trevorschoeny.inventorymax.pocket.SliceStorage;
-import com.trevlar.menukit.containers.core.MKCSlots;
-import com.trevlar.menukit.core.Storage;
+import com.trevlar.menukit.containers.api.slot.CreatedSlots;
+import com.trevlar.menukit.api.slot.Storage;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -49,7 +49,7 @@ public abstract class InventoryMenuEquipmentMixin {
         AbstractContainerMenu menu = (AbstractContainerMenu) (Object) this;
 
         // Elytra slot (top) — accepts only elytra, one item.
-        MKCSlots.onto(menu, player)
+        CreatedSlots.onto(menu, player)
                 .panel(EquipmentSlots.panelId(EquipmentSlots.ELYTRA_GROUP))
                 .group(EquipmentSlots.ELYTRA_GROUP)
                 .category(EquipmentSlots.EQUIPMENT_ELYTRA)
@@ -62,7 +62,7 @@ public abstract class InventoryMenuEquipmentMixin {
                 .register();
 
         // Totem slot (bottom, just above the offhand) — accepts only totems, one item.
-        MKCSlots.onto(menu, player)
+        CreatedSlots.onto(menu, player)
                 .panel(EquipmentSlots.panelId(EquipmentSlots.TOTEM_GROUP))
                 .group(EquipmentSlots.TOTEM_GROUP)
                 .category(EquipmentSlots.EQUIPMENT_TOTEM)

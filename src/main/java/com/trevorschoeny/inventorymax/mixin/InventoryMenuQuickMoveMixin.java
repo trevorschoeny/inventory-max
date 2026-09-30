@@ -2,7 +2,7 @@ package com.trevorschoeny.inventorymax.mixin;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.equipment.EquipmentSlots;
-import com.trevlar.menukit.containers.core.MKCSlot;
+import com.trevlar.menukit.containers.api.slot.CreatedSlot;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -61,7 +61,7 @@ public abstract class InventoryMenuQuickMoveMixin {
         if (index == elytraIdx || index == totemIdx) {
             // No binding check needed here: vanilla's doClick pre-checks
             // slot.mayPickup before it ever calls quickMoveStack, and the §0053
-            // MKC binding behavior (SlotSpec.binding() / MKCBehaviorKeys.BINDING)
+            // MKC binding behavior (SlotSpec.binding() / ContainerKeys.BINDING)
             // makes mayPickup false for a bound item — so a bound item's
             // shift-click never reaches this router.
             // Curse of Binding is fully library-enforced on every removal path.
@@ -97,7 +97,7 @@ public abstract class InventoryMenuQuickMoveMixin {
     /** Menu index of the registered equipment slot in {@code groupId}, or -1. */
     private static int inventoryMax$findEquip(AbstractContainerMenu menu, String groupId) {
         for (int k = 0; k < menu.slots.size(); k++) {
-            if (menu.slots.get(k) instanceof MKCSlot mk && groupId.equals(mk.getGroupId())) {
+            if (menu.slots.get(k) instanceof CreatedSlot mk && groupId.equals(mk.groupId())) {
                 return k;
             }
         }

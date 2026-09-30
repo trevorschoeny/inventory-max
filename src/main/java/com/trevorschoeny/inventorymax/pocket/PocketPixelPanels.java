@@ -2,16 +2,18 @@ package com.trevorschoeny.inventorymax.pocket;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
-import com.trevlar.menukit.core.Click;
-import com.trevlar.menukit.core.Panel;
-import com.trevlar.menukit.core.PanelElement;
-import com.trevlar.menukit.core.PanelPosition;
-import com.trevlar.menukit.core.PanelStyle;
-import com.trevlar.menukit.core.RenderContext;
-import com.trevlar.menukit.containers.core.SlotElement;
-import com.trevlar.menukit.inject.ScreenOrigin;
-import com.trevlar.menukit.inject.ScreenPanelAdapter;
-import com.trevlar.menukit.inject.SlotScreenRect;
+import com.trevlar.menukit.api.element.Click;
+import com.trevlar.menukit.api.element.InputContext;
+import com.trevlar.menukit.api.panel.Panel;
+import com.trevlar.menukit.api.element.PanelElement;
+import com.trevlar.menukit.api.panel.PanelPosition;
+import com.trevlar.menukit.api.panel.PanelStyle;
+import com.trevlar.menukit.api.element.RenderContext;
+import com.trevlar.menukit.containers.api.slot.SlotElement;
+import com.trevlar.menukit.containers.api.slot.CreatedSlots;
+import com.trevlar.menukit.api.panel.ScreenOrigin;
+import com.trevlar.menukit.api.panel.ScreenPanelAdapter;
+import com.trevlar.menukit.api.slot.SlotScreenRect;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -72,8 +74,8 @@ public final class PocketPixelPanels {
             // "inventorymax:pocket_n_d", group "pocket_n_d", 1 slot each. The
             // element self-hides while its slot is inert (not revealed).
             String g = Pockets.groupId(hotbar, d);
-            slots.add(new SlotElement("inventorymax:" + g, g, 0,
-                    d * Pockets.SLOT, 0));
+            slots.add(SlotElement.builder().slot(CreatedSlots.groupId("inventorymax:" + g, g), 0)
+                    .at(d * Pockets.SLOT, 0).build());
         }
         Panel row = Panel.builder("inventorymax:pocketrow_" + hotbar)
                 .elements(slots)
@@ -209,7 +211,7 @@ public final class PocketPixelPanels {
         }
 
         @Override
-        public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        public boolean mouseClicked(InputContext in, int button) {
             // Ctrl+click (Cmd on a Mac) opens the Pockets settings tab instead,
             // as every Inventory Plus and Inventory Max button does.
             if (Click.of(button).ctrl()) {

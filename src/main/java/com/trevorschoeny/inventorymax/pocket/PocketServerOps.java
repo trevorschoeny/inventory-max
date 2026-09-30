@@ -1,9 +1,9 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevlar.menukit.core.Storage;
-import com.trevlar.menukit.window.BehaviorKey;
-import com.trevlar.menukit.window.SlotOperations;
-import com.trevlar.menukit.window.TriBool;
+import com.trevlar.menukit.api.slot.Storage;
+import com.trevlar.menukit.api.window.BehaviorKey;
+import com.trevlar.menukit.api.window.SlotOperations;
+import com.trevlar.menukit.api.window.TriBool;
 
 
 import net.minecraft.server.level.ServerPlayer;

@@ -3,8 +3,8 @@ package com.trevorschoeny.inventorymax.equipment;
 import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
 import com.trevorschoeny.inventoryplus.api.PlayerMenuSlots;
 import com.trevorschoeny.inventoryplus.api.InventoryPlusOperations;
-import com.trevlar.menukit.containers.core.MKCSlot;
-import com.trevlar.menukit.window.SlotOperations;
+import com.trevlar.menukit.containers.api.slot.CreatedSlot;
+import com.trevlar.menukit.api.window.SlotOperations;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import com.trevorschoeny.inventorymax.config.IMConfig;
@@ -112,7 +112,7 @@ public final class EquipAutoRestock {
     private static boolean totemSlotAllowsRestock(LocalPlayer player) {
         AbstractContainerMenu menu = player.inventoryMenu;
         for (Slot s : menu.slots) {
-            if (s instanceof MKCSlot mk && EquipmentSlots.TOTEM_GROUP.equals(mk.getGroupId())) {
+            if (s instanceof CreatedSlot mk && EquipmentSlots.TOTEM_GROUP.equals(mk.groupId())) {
                 return SlotOperations.allows(menu, s, player, InventoryPlusOperations.RESTOCK_PUT);
             }
         }

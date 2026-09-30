@@ -1,9 +1,9 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevlar.menukit.containers.core.MKCSlot;
-import com.trevlar.menukit.window.BehaviorKey;
-import com.trevlar.menukit.window.SlotOperations;
-import com.trevlar.menukit.window.TriBool;
+import com.trevlar.menukit.containers.api.slot.CreatedSlot;
+import com.trevlar.menukit.api.window.BehaviorKey;
+import com.trevlar.menukit.api.window.SlotOperations;
+import com.trevlar.menukit.api.window.TriBool;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -15,7 +15,7 @@ import net.minecraft.world.inventory.Slot;
  * server asks again for the operation the packet names, through this one class,
  * so the two cannot disagree about which slots a move touches.
  *
- * <p>Pocket slots are real {@link MKCSlot}s on every {@code InventoryMenu}, on
+ * <p>Pocket slots are real {@link CreatedSlot}s on every {@code InventoryMenu}, on
  * both sides, even while hidden, so {@code SlotOperations.allows} can be asked
  * about them in the world with no screen open. A slot that cannot be found is
  * refused: MenuKit could not be asked, and a move that was never asked about
@@ -57,7 +57,7 @@ public final class PocketRing {
     public static int pocketMenuIndex(AbstractContainerMenu menu, int hotbar, int depth) {
         String groupId = Pockets.groupId(hotbar, depth);
         for (int k = 0; k < menu.slots.size(); k++) {
-            if (menu.slots.get(k) instanceof MKCSlot mk && groupId.equals(mk.getGroupId())) {
+            if (menu.slots.get(k) instanceof CreatedSlot mk && groupId.equals(mk.groupId())) {
                 return k;
             }
         }

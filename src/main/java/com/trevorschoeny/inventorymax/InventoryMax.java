@@ -1,7 +1,7 @@
 package com.trevorschoeny.inventorymax;
 
-import com.trevlar.menukit.window.TriBool;
-import com.trevlar.menukit.window.BehaviorKey;
+import com.trevlar.menukit.api.window.TriBool;
+import com.trevlar.menukit.api.window.BehaviorKey;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.containerlocks.ContainerLocks;
 import com.trevorschoeny.inventorymax.equipment.EquipmentSlots;
@@ -12,7 +12,7 @@ import com.trevorschoeny.inventorymax.pocket.PocketQuickMoveC2S;
 import com.trevorschoeny.inventorymax.pocket.PocketRotateC2S;
 import com.trevorschoeny.inventorymax.pocket.PocketServerOps;
 import com.trevorschoeny.inventorymax.pocket.Pockets;
-import com.trevlar.menukit.containers.core.MendingCandidates;
+import com.trevlar.menukit.containers.api.slot.MendingCandidates;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;

@@ -5,10 +5,10 @@ import com.trevorschoeny.inventoryplus.api.CyclerOperation;
 import com.trevorschoeny.inventoryplus.api.HotbarCyclable;
 import com.trevorschoeny.inventorymax.config.IMConfig;
 import com.trevorschoeny.inventorymax.operations.InventoryMaxOperations;
-import com.trevlar.menukit.window.BehaviorKey;
-import com.trevlar.menukit.window.TriBool;
+import com.trevlar.menukit.api.window.BehaviorKey;
+import com.trevlar.menukit.api.window.TriBool;
 import net.minecraft.client.Minecraft;
-import com.trevlar.menukit.core.Storage;
+import com.trevlar.menukit.api.slot.Storage;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.world.entity.player.Player;

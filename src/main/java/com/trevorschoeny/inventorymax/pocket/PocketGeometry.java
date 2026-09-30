@@ -1,9 +1,8 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevlar.menukit.containers.core.MKCSlot;
-import com.trevlar.menukit.containers.core.MKCSlotAccess;
-import com.trevlar.menukit.inject.SlotScreenRect;
-import com.trevlar.menukit.inject.VanillaSlotResolver;
+import com.trevlar.menukit.containers.api.slot.CreatedSlot;
+import com.trevlar.menukit.api.slot.SlotScreenRect;
+import com.trevlar.menukit.api.slot.VanillaSlotResolver;
 
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.world.inventory.Slot;
@@ -76,16 +75,16 @@ public final class PocketGeometry {
 
     /**
      * Whether this screen's live menu actually carries our pocket slots — true
-     * on the survival inventory (the {@code MKCSlot} sits directly in the menu)
+     * on the survival inventory (the {@code CreatedSlot} sits directly in the menu)
      * and the creative <em>inventory</em> tab (wrapped, unwrapped by
-     * {@link MKCSlotAccess#asMKCSlot}); false everywhere else. The hotbar alone
+     * {@link CreatedSlot#of}); false everywhere else. The hotbar alone
      * isn't enough to gate on: creative's non-inventory tabs surface a hotbar
      * but not the pockets, and container screens surface neither.
      */
     public static boolean pocketsPresent(AbstractContainerScreen<?> screen) {
         for (Slot s : screen.getMenu().slots) {
-            MKCSlot mk = MKCSlotAccess.asMKCSlot(s);
-            if (mk != null && Pockets.isPocketGroup(mk.getGroupId())) return true;
+            CreatedSlot mk = CreatedSlot.of(s);
+            if (mk != null && Pockets.isPocketGroup(mk.groupId())) return true;
         }
         return false;
     }

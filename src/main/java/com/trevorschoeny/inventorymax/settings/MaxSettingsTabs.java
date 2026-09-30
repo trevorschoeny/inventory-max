@@ -5,15 +5,15 @@ import com.trevorschoeny.inventoryplus.api.InventoryPlusApi;
 import com.trevorschoeny.inventorymax.config.IMKeybinds;
 import com.trevorschoeny.inventorymax.pocket.PocketHudMode;
 
-import com.trevlar.menukit.core.Button;
-import com.trevlar.menukit.core.Checkbox;
-import com.trevlar.menukit.core.Divider;
-import com.trevlar.menukit.core.Dropdown;
-import com.trevlar.menukit.core.Flow;
-import com.trevlar.menukit.core.PanelElement;
-import com.trevlar.menukit.core.Tabs;
-import com.trevlar.menukit.core.TextLabel;
-import com.trevlar.menukit.core.Toggle;
+import com.trevlar.menukit.api.element.Button;
+import com.trevlar.menukit.api.element.Checkbox;
+import com.trevlar.menukit.api.element.Divider;
+import com.trevlar.menukit.api.element.Dropdown;
+import com.trevlar.menukit.api.element.Flow;
+import com.trevlar.menukit.api.element.PanelElement;
+import com.trevlar.menukit.api.element.Tabs;
+import com.trevlar.menukit.api.element.TextLabel;
+import com.trevlar.menukit.api.element.Toggle;
 
 import com.trevorschoeny.keybindery.api.KeybinderyAPI;
 import com.trevorschoeny.keybindery.chord.ChordButton;
@@ -151,23 +151,25 @@ public final class MaxSettingsTabs {
          */
         Body frame(String title, String description, BooleanSupplier on, Consumer<Boolean> setOn,
                    Runnable reset) {
-            out.add(new TextLabel(0, y, Component.literal(title), TextLabel.COLOR_DARK, false).scale(2f));
+            out.add(TextLabel.builder().at(0, y).text(Component.literal(title))
+                    .color(TextLabel.COLOR_DARK).scale(2f).build());
             y += 24;
-            out.add(new TextLabel(0, y, Component.literal(description), TEXT, false));
+            out.add(TextLabel.builder().at(0, y).text(Component.literal(description)).color(TEXT).build());
             y += 16;
-            out.add(Flow.of(List.of(
-                    Toggle.linked(0, 0, 40, 16, on, setOn, null)
-                            .label(() -> Component.literal(on.getAsBoolean() ? "On" : "Off")),
-                    new Button(0, 0, Minecraft.getInstance().font.width("Reset to Defaults") + 12, 16,
-                            Component.literal("Reset to Defaults"),
-                            b -> InventoryPlusApi.confirmInSettings("Reset " + title + " to defaults?",
+            // The toggle at the left, Reset pinned to the right edge by the spacer.
+            out.add(Flow.builder().at(0, y).gap(10, 4)
+                    .add(Toggle.builder().size(40, 16).state(on, setOn)
+                            .label(() -> Component.literal(on.getAsBoolean() ? "On" : "Off")).build())
+                    .add(Flow.spacer())
+                    .add(Button.builder().label(Component.literal("Reset to Defaults")).size(0, 16)
+                            .onClick(() -> InventoryPlusApi.confirmInSettings("Reset " + title + " to defaults?",
                                     "Every setting and key on this tab goes back to how a fresh install has it.",
-                                    reset))))
-                    .gap(10, 4).at(0, y));
+                                    reset))
+                            .build())
+                    .build());
             y += 22;
             featureOn = on;
-            // ponytail: a long divider; MenuKit caps it to the body's width.
-            out.add(Divider.horizontal(0, y, 4000, 0xFF8B8B8B, 1));
+            out.add(Divider.horizontal().at(0, y).color(0xFF8B8B8B).build());
             y += 6;
             return this;
         }
@@ -181,7 +183,8 @@ public final class MaxSettingsTabs {
         /** Settings text, turning grey while the feature is off. */
         private TextLabel settingText(int x, int y, Component text, int color) {
             BooleanSupplier on = featureOn;
-            return new TextLabel(x, y, () -> on.getAsBoolean() ? text : text.copy().withColor(0xFF8B8B8B), color, false);
+            return TextLabel.builder().at(x, y).text(text).color(color)
+                    .disabledWhen(() -> !on.getAsBoolean()).build();
         }
 
         /** A working key: Keybindery's button, labelled with the key's name. */
@@ -194,7 +197,7 @@ public final class MaxSettingsTabs {
             y += 8;
             out.add(settingText(0, y, Component.literal(text), TextLabel.COLOR_DARK));
             y += 12;
-            out.add(Divider.horizontal(0, y - 2, 160, 0xFF8B8B8B, 1));
+            out.add(Divider.horizontal().at(0, y - 2).size(160, 1).color(0xFF8B8B8B).build());
             y += 2;
             return this;
         }
@@ -207,7 +210,7 @@ public final class MaxSettingsTabs {
 
         Body key(KeyMapping key) {
             label(Component.translatable(key.getName()));
-            out.add(new ChordButton(key).disabledWhen(gated(() -> false)).at(0, y));
+            out.add(ChordButton.builder(key).at(0, y).disabledWhen(gated(() -> false)).build());
             y += 20;
             return this;
         }
@@ -223,10 +226,10 @@ public final class MaxSettingsTabs {
             label(Component.literal(label));
             out.add(Dropdown.<T>builder()
                     .at(0, y)
-                    .triggerSize(110, 16)
+                    .size(110, 16)
                     .items(values)
                     .label(v -> Component.literal(name.apply(v)))
-                    .selection(get, set)
+                    .state(get, set)
                     .disabledWhen(gated(unavailable))
                     .build());
             y += 20;
@@ -235,7 +238,8 @@ public final class MaxSettingsTabs {
 
         /** A checkbox bound to its setting, greyed while {@code unavailable}. */
         Body checkbox(String label, BooleanSupplier get, Consumer<Boolean> set, BooleanSupplier unavailable) {
-            out.add(Checkbox.linked(0, y, get, Component.literal(label), set, gated(unavailable)));
+            out.add(Checkbox.builder().at(0, y).label(Component.literal(label)).state(get, set)
+                    .disabledWhen(gated(unavailable)).build());
             y += 16;
             return this;
         }

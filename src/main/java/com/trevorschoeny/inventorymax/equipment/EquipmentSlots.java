@@ -1,16 +1,16 @@
 package com.trevorschoeny.inventorymax.equipment;
 
-import com.trevlar.menukit.core.SlotGroupCategory;
-import com.trevlar.menukit.containers.core.MKCBehaviorKeys;
-import com.trevlar.menukit.containers.core.MKCSlots;
-import com.trevlar.menukit.inject.SlotGroups;
-import com.trevlar.menukit.core.Storage;
-import com.trevlar.menukit.containers.core.StorageAttachment;
-import com.trevlar.menukit.window.Address;
-import com.trevlar.menukit.window.GatingContext;
-import com.trevlar.menukit.window.SlotGate;
-import com.trevlar.menukit.window.TriBool;
-import com.trevlar.menukit.window.Window;
+import com.trevlar.menukit.api.slot.SlotGroupCategory;
+import com.trevlar.menukit.containers.api.slot.ContainerKeys;
+import com.trevlar.menukit.containers.api.slot.CreatedSlots;
+import com.trevlar.menukit.api.slot.SlotGroups;
+import com.trevlar.menukit.api.slot.Storage;
+import com.trevlar.menukit.containers.api.storage.StorageAttachment;
+import com.trevlar.menukit.api.window.Address;
+import com.trevlar.menukit.api.window.GatingContext;
+import com.trevlar.menukit.api.window.SlotGate;
+import com.trevlar.menukit.api.window.TriBool;
+import com.trevlar.menukit.api.window.Window;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -132,8 +132,8 @@ public final class EquipmentSlots {
      * "Totem slot". Idempotent.
      */
     public static void declareGroups() {
-        SlotGroups.declare(MKCSlots.groupId(panelId(ELYTRA_GROUP), ELYTRA_GROUP), EQUIPMENT_ELYTRA);
-        SlotGroups.declare(MKCSlots.groupId(panelId(TOTEM_GROUP), TOTEM_GROUP), EQUIPMENT_TOTEM);
+        SlotGroups.declare(CreatedSlots.groupId(panelId(ELYTRA_GROUP), ELYTRA_GROUP), EQUIPMENT_ELYTRA);
+        SlotGroups.declare(CreatedSlots.groupId(panelId(TOTEM_GROUP), TOTEM_GROUP), EQUIPMENT_TOTEM);
     }
 
     public static void declareSlotBehavior() {
@@ -143,7 +143,7 @@ public final class EquipmentSlots {
 
     /** GATING (filter + single item) + BINDING + MENDING on the group's one slot, by address. */
     private static void declare(String group, Predicate<ItemStack> accepts) {
-        Address a = Address.createdSlot(MKCSlots.groupId(panelId(group), group), 0);
+        Address a = Address.createdSlot(CreatedSlots.groupId(panelId(group), group), 0);
         Window.slot(a)
                 .gate(new SlotGate() {
                     @Override public boolean mayPlace(ItemStack stack, GatingContext ctx) { return accepts.test(stack); }
@@ -151,7 +151,7 @@ public final class EquipmentSlots {
                     @Override public int maxStackSize(ItemStack stack, int vanillaMax) { return Math.min(1, vanillaMax); }
                 })
                 .binding(true);
-        Window.slot(a).set(MKCBehaviorKeys.MENDING, TriBool.TRUE);
+        Window.slot(a).set(ContainerKeys.MENDING, TriBool.TRUE);
     }
 
     // ─── Behavior reads ──────────────────────────────────────────────────

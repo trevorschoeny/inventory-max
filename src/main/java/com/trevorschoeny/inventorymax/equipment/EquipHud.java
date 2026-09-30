@@ -2,10 +2,10 @@ package com.trevorschoeny.inventorymax.equipment;
 
 import com.trevorschoeny.inventorymax.config.IMConfig;
 
-import com.trevlar.menukit.core.ItemDisplay;
-import com.trevlar.menukit.core.PanelStyle;
-import com.trevlar.menukit.hud.MKHudAnchor;
-import com.trevlar.menukit.hud.MKHudPanel;
+import com.trevlar.menukit.api.element.ItemDisplay;
+import com.trevlar.menukit.api.panel.InsideRegion;
+import com.trevlar.menukit.api.panel.PanelStyle;
+import com.trevlar.menukit.api.hud.HudPanel;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -20,7 +20,7 @@ import net.minecraft.world.item.Items;
  * when an elytra is worn in the vanilla chest slot, so "you've got wings" reads
  * the same however you equipped them.
  *
- * <p>Built on MenuKit's HUD primitive ({@code MKHudPanel}) — HUD is its UI
+ * <p>Built on MenuKit's HUD primitive ({@code HudPanel}) — HUD is its UI
  * wheelhouse. Render-only, registered once at client init. Icon-only (no
  * count/durability overlay) for a clean little indicator. An empty supplier
  * renders nothing, so "show when occupied" falls out for free. Pixel position
@@ -34,20 +34,24 @@ public final class EquipHud {
     // scales; the offsets nudge the 16px icon column just left of the hotbar.
     private static final int ICON_SIZE = 12;  // 12px icons (¾ of vanilla's native 16px)
     private static final int OFFSET_X = -99;  // snug to the hotbar (~2px gap, no awkward space)
-    private static final int OFFSET_Y = -3;   // bottom icon aligned to the hotbar item row
+    // MenuKit 6.0.0: a HUD region sits 4px in from the edge it touches, so the
+    // old anchor's -3 from the bottom is +1 from the region (same pixel).
+    private static final int OFFSET_Y = 1;    // bottom icon aligned to the hotbar item row
     private static final int ICON_PITCH = 13; // elytra above totem (1px vertical gap)
 
     /** Register the HUD cue. Call once from client init. */
     public static void register() {
-        MKHudPanel.builder(EquipmentSlots.MOD_ID + ":equip_cues")
-                .anchor(MKHudAnchor.BOTTOM_CENTER, OFFSET_X, OFFSET_Y)
+        HudPanel.builder(EquipmentSlots.MOD_ID + ":equip_cues")
+                .region(InsideRegion.BOTTOM_CENTER).offset(OFFSET_X, OFFSET_Y)
                 .padding(0).autoSize()
                 .style(PanelStyle.NONE)
-                .showInScreen() // persist like a status cue — don't vanish when a screen opens
-                .showWhen(() -> IMConfig.equipmentSlotsEnabled() && IMConfig.equipmentHudCue()
+                // Shown in screens too (the default), like a status cue.
+                .visibleWhen(() -> IMConfig.equipmentSlotsEnabled() && IMConfig.equipmentHudCue()
                         && (!elytraCue().isEmpty() || !totemCue().isEmpty()))
-                .element(new ItemDisplay(0, 0, ICON_SIZE, EquipHud::elytraCue, false, false))
-                .element(new ItemDisplay(0, ICON_PITCH, ICON_SIZE, EquipHud::totemCue, false, false))
+                .element(ItemDisplay.builder().at(0, 0).item(EquipHud::elytraCue)
+                        .size(ICON_SIZE, ICON_SIZE).hideCount().hideDurability().build())
+                .element(ItemDisplay.builder().at(0, ICON_PITCH).item(EquipHud::totemCue)
+                        .size(ICON_SIZE, ICON_SIZE).hideCount().hideDurability().build())
                 .build();
     }
 

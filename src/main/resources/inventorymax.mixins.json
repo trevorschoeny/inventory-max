@@ -5,9 +5,6 @@
   "compatibilityLevel": "JAVA_25",
   "mixins": [
     "AbstractContainerMenuMoveInvoker",
-    "ContainerLockClickCaptureMixin",
-    "ContainerLockEnforcementMixin",
-    "ContainerLockPickAllMixin",
     "DispenserLockEnforcementMixin",
     "EquipmentGlideMixin",
     "EquipmentTotemMixin",

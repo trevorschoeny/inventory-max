@@ -5,7 +5,7 @@ import com.trevorschoeny.inventorymax.pocket.PocketHudMode;
 import com.trevorschoeny.inventoryplus.api.CycleHudSource;
 import com.trevorschoeny.inventoryplus.api.CycleView;
 import com.trevorschoeny.inventorymax.config.IMConfig;
-import com.trevlar.menukit.core.Storage;
+import com.trevlar.menukit.api.slot.Storage;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;

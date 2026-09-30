@@ -3,9 +3,9 @@ package com.trevorschoeny.inventorymax.mixin;
 import com.trevorschoeny.inventorymax.pocket.PocketHoverState;
 import com.trevorschoeny.inventorymax.pocket.Pockets;
 import com.trevorschoeny.inventorymax.pocket.SliceStorage;
-import com.trevlar.menukit.containers.core.MKCSlots;
-import com.trevlar.menukit.core.SlotGroupCategory;
-import com.trevlar.menukit.core.Storage;
+import com.trevlar.menukit.containers.api.slot.CreatedSlots;
+import com.trevlar.menukit.api.slot.SlotGroupCategory;
+import com.trevlar.menukit.api.slot.Storage;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -48,7 +48,7 @@ public abstract class InventoryMenuPocketMixin {
                 // also fires the advancement trigger on server-side writes.
                 Storage slice = new SliceStorage(
                         backing, Pockets.flatIndex(n, d), 1, player);
-                MKCSlots.onto(menu, player)
+                CreatedSlots.onto(menu, player)
                         .panel(Pockets.panelId(n, d))
                         .group(Pockets.groupId(n, d))
                         // Pockets ARE general player storage: a feature searching the

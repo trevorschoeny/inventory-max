@@ -1,14 +1,14 @@
 package com.trevorschoeny.inventorymax.pocket;
 
-import com.trevlar.menukit.window.Address;
-import com.trevlar.menukit.containers.core.MKCSlots;
-import com.trevlar.menukit.core.SlotGroupCategory;
-import com.trevlar.menukit.inject.SlotGroupSet;
-import com.trevlar.menukit.inject.SlotGroups;
-import com.trevlar.menukit.containers.core.MKCBehaviorKeys;
-import com.trevlar.menukit.containers.core.StorageAttachment;
-import com.trevlar.menukit.window.TriBool;
-import com.trevlar.menukit.window.Window;
+import com.trevlar.menukit.api.window.Address;
+import com.trevlar.menukit.containers.api.slot.CreatedSlots;
+import com.trevlar.menukit.api.slot.SlotGroupCategory;
+import com.trevlar.menukit.api.slot.SlotGroupSet;
+import com.trevlar.menukit.api.slot.SlotGroups;
+import com.trevlar.menukit.containers.api.slot.ContainerKeys;
+import com.trevlar.menukit.containers.api.storage.StorageAttachment;
+import com.trevlar.menukit.api.window.TriBool;
+import com.trevlar.menukit.api.window.Window;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
@@ -84,8 +84,8 @@ public final class Pockets {
         for (int n = 0; n < HOTBAR_SLOTS; n++) {
             for (int d = 0; d < MAX_PER_SLOT; d++) {
                 String g = groupId(n, d);
-                Window.slot(Address.createdSlot(MKCSlots.groupId(panelId(n, d), g), 0))
-                        .set(MKCBehaviorKeys.MENDING, TriBool.TRUE);
+                Window.slot(Address.createdSlot(CreatedSlots.groupId(panelId(n, d), g), 0))
+                        .set(ContainerKeys.MENDING, TriBool.TRUE);
             }
         }
     }
@@ -120,7 +120,7 @@ public final class Pockets {
     public static void declareGroups() {
         for (int n = 0; n < HOTBAR_SLOTS; n++) {
             for (int d = 0; d < MAX_PER_SLOT; d++) {
-                SlotGroups.declare(MKCSlots.groupId(panelId(n, d), groupId(n, d)),
+                SlotGroups.declare(CreatedSlots.groupId(panelId(n, d), groupId(n, d)),
                         SlotGroupCategory.PLAYER_INVENTORY, POCKET_SET);
             }
         }

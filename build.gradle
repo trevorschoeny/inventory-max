@@ -41,6 +41,8 @@ repositories {
 // dependency sees only main, so its client half is added below by output,
 // which needs MenuKit evaluated first. A published jar holds both halves.
 evaluationDependsOn(':menukit')
+// MenuKit: Containers splits the same way in 6.0.0 phase 6 (§0067, §0069).
+evaluationDependsOn(':menukit-containers')
 // Inventory Plus is split the same way (§0062); its client half comes by output too.
 evaluationDependsOn(':inventory-plus')
 // Keybindery is universal the same way; its client half comes by output too.
@@ -70,6 +72,7 @@ dependencies {
     // deps — the `namedElements` variant is gone with the remap layer.)
     implementation project(':menukit-containers')
     implementation rootProject.project(':menukit').sourceSets.client.output
+    implementation rootProject.project(':menukit-containers').sourceSets.client.output
 
     // Inventory Plus — IM composes IP's public cycler + HUD registry
     // (HotbarCyclableRegistry, CycleHudRegistry, CycleView, HudMode) and
