@@ -1,3 +1,9 @@
-Nothing changes in how Inventory Max plays in this version. Underneath, Pocket Cycler now has a name that MenuKit and other mods can look up, like the Inventory Plus features, and a pocket tells Restock and Auto Tool Switch whether it can be used before they choose it. The pockets, the Elytra slot and the Totem slot are listed as named slot groups, with all 27 pockets as one entry called Pockets.
+Requires Inventory Plus 1.8.0 or newer, Keybindery 1.1.0 or newer, and MenuKit and MenuKit: Containers 6.0.0 or newer, below 7.0.0.
 
-Requires MenuKit and MenuKit: Containers 5.1.0 or newer, below 6.0.0, and Inventory Plus 1.7.0 or newer.
+Container locks are no longer shared by default. Sharing used to be Inventory Max's own setting and started on. It is now Inventory Plus's "Also keep container locks on the server", on its Lock groups tab, and it starts off. Turn it on to share the container locks you place from then on. Locks the server already keeps stay in place.
+
+The server decides every shared container lock, and a lock stops the same moves a locked slot in your inventory does: shift-clicking in and out, double-click collecting, dragging, dropping, and number-key and offhand swaps.
+
+Inventory Max's settings are now tabs in Inventory Plus's settings menu: Pockets, Equipment Slots and Mend Anywhere. Inventory Max's config button in Mod Menu opens them.
+
+In Reach, Pocket Cycler lists only the slots you carry and your pockets.
