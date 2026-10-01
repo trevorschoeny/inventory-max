@@ -32,8 +32,10 @@ java {
 repositories {
     maven { url 'https://maven.fabricmc.net/' }
     maven { url 'https://maven.terraformersmc.com/releases/' }
-    // 26.x: YACL's 26.2 builds ship via the Modrinth maven only
-    // (isxander's own maven stops at 3.8.x; verified 2026-07-02).
+    // Modrinth maven: not for this mod. Keybindery (a project dependency)
+    // depends on YACL, whose 26.2 builds ship only here, so Gradle needs it
+    // to resolve Keybindery's runtime classpath. This mod neither compiles
+    // against YACL nor bundles it.
     maven { url 'https://api.modrinth.com/maven' }
 }
 
@@ -59,11 +61,6 @@ dependencies {
     // (⚠️ beta — only 26.2 build available.)
     compileOnly "com.terraformersmc:modmenu:20.0.1"
     localRuntime "com.terraformersmc:modmenu:20.0.1"
-
-    // YACL — config-screen framework, JIJ'd into IM's jar (§0031, agency
-    // standard). implementation = compile + dev runtime; include = JIJ.
-    implementation "maven.modrinth:yacl:3.9.6+26.2-fabric"
-    include        "maven.modrinth:yacl:3.9.6+26.2-fabric"
 
     // MenuKit-Containers — the §0045 slot-graft kit (MenuKitGraft, KeyedStorages,
     // StorageAttachment, MKSlotState, MenuKitGraftRender, MenuKitSlot). MenuKit
