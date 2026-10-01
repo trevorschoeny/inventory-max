@@ -1,11 +1,16 @@
 package com.trevorschoeny.inventorymax.operations;
 
+import com.trevlar.menukit.api.slot.SlotGroupCategory;
 import com.trevlar.menukit.api.window.BehaviorKey;
 import com.trevlar.menukit.api.window.KindTag;
 import com.trevlar.menukit.api.window.SlotOperations;
+import com.trevlar.menukit.api.window.SlotOperations.AppliesTo;
 import com.trevlar.menukit.api.window.SlotOperations.Role;
 import com.trevlar.menukit.api.window.Tier;
 import com.trevlar.menukit.api.window.TriBool;
+
+import com.trevlar.menukit.containers.api.slot.CreatedSlots;
+import com.trevorschoeny.inventorymax.equipment.EquipmentSlots;
 
 import net.minecraft.resources.Identifier;
 
@@ -28,11 +33,24 @@ public final class InventoryMaxOperations {
     public static final BehaviorKey<TriBool> POCKET_CYCLE = recipe("inventorymax", "pocket_cycle");
 
     /**
-     * Defines Pocket Cycler with its role so MenuKit lists it. Common init, so it
-     * is listed from the title screen and known to a dedicated server. Idempotent.
+     * Defines Pocket Cycler with its role and where it acts, so MenuKit lists
+     * it and the Reach tab offers only those groups. Common init, so it is
+     * listed from the title screen and known to a dedicated server. Idempotent.
+     *
+     * <p>It moves items between a hotbar slot and the pockets behind it, so it
+     * applies to the hotbar and the pockets (Designer, 2026-09-30), the same
+     * shape as Inventory Plus's cyclers. ponytail: MenuKit's {@code AppliesTo}
+     * cannot name the hotbar and pockets without the main inventory, because a
+     * pocket declares {@code PLAYER_INVENTORY} and goes where that category
+     * goes; so it takes the carried slots and drops the equipment slots. The
+     * main inventory stays offered until {@code AppliesTo} can name a mod's
+     * set on its own.
      */
     public static void define() {
-        SlotOperations.define(POCKET_CYCLE, Role.BOTH);
+        AppliesTo pocketsAndHotbar = AppliesTo.vanilla(SlotGroupCategory.PLAYER_INVENTORY, SlotGroupCategory.PLAYER_HOTBAR)
+                .except(CreatedSlots.groupId(EquipmentSlots.panelId(EquipmentSlots.ELYTRA_GROUP), EquipmentSlots.ELYTRA_GROUP),
+                        CreatedSlots.groupId(EquipmentSlots.panelId(EquipmentSlots.TOTEM_GROUP), EquipmentSlots.TOTEM_GROUP));
+        SlotOperations.define(POCKET_CYCLE, Role.BOTH, pocketsAndHotbar);
     }
 
     /**
