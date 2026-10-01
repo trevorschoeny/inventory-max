@@ -19,6 +19,7 @@ import com.trevorschoeny.keybindery.api.KeybinderyAPI;
 import com.trevorschoeny.keybindery.chord.ChordButton;
 import com.trevorschoeny.keybindery.chord.IChordKeyMapping;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -151,9 +152,16 @@ public final class MaxSettingsTabs {
          */
         Body frame(String title, String description, BooleanSupplier on, Consumer<Boolean> setOn,
                    Runnable reset) {
-            out.add(TextLabel.builder().at(0, y).text(Component.literal(title))
+            // The mod's name at twice size, bold, then the tab's title, bold, as on
+            // Inventory Plus's tabs. These tabs exist only with Inventory Max, so
+            // the name is always "Inventory Plus Max".
+            out.add(TextLabel.builder().at(0, y)
+                    .text(Component.literal("Inventory Plus Max").withStyle(ChatFormatting.BOLD))
                     .color(TextLabel.COLOR_DARK).scale(2f).build());
             y += 24;
+            out.add(TextLabel.builder().at(0, y).text(Component.literal(title).withStyle(ChatFormatting.BOLD))
+                    .color(TextLabel.COLOR_DARK).build());
+            y += 14;
             out.add(TextLabel.builder().at(0, y).text(Component.literal(description)).color(TEXT).build());
             y += 16;
             // The toggle at the left, Reset pinned to the right edge by the spacer.
