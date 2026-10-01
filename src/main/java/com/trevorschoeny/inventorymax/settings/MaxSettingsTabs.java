@@ -152,17 +152,8 @@ public final class MaxSettingsTabs {
          */
         Body frame(String title, String description, BooleanSupplier on, Consumer<Boolean> setOn,
                    Runnable reset) {
-            // The mod's name at twice size, bold, then the tab's title, bold, as on
-            // Inventory Plus's tabs. These tabs exist only with Inventory Max, so
-            // the name is always "Inventory Plus Max".
-            out.add(Flow.builder().at(0, y).gap(0, 0)
-                    .add(Flow.spacer())
-                    .add(TextLabel.builder()
-                            .text(Component.literal("Inventory Plus Max").withStyle(ChatFormatting.BOLD))
-                            .color(TextLabel.COLOR_DARK).scale(2f).build())
-                    .add(Flow.spacer())
-                    .build());
-            y += 24;
+            // The tab's title, bold, as on Inventory Plus's tabs. The mod's name
+            // is Inventory Plus's bar across the whole menu panel, not here.
             out.add(TextLabel.builder().at(0, y).text(Component.literal(title).withStyle(ChatFormatting.BOLD))
                     .color(TextLabel.COLOR_DARK).build());
             y += 14;
