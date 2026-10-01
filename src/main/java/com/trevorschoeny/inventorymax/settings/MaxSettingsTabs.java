@@ -145,40 +145,43 @@ public final class MaxSettingsTabs {
         private BooleanSupplier featureOn = () -> true;
 
         /**
-         * The frame: the title at twice size; the description; the
-         * feature's on/off toggle, reading "On" or "Off", with Reset to Defaults
-         * to its right, which asks first through Inventory Plus's menu and
-         * then runs {@code reset}; then a line.
+         * The frame, as Inventory Plus's tabs have it (Trev, 2026-09-30): the
+         * mod's name centred, the title, the description, the line, then Reset
+         * to Defaults (asking first through Inventory Plus's menu, then
+         * running {@code reset}) with the On/Off switch after it, at the left.
          */
         Body frame(String title, String description, BooleanSupplier on, Consumer<Boolean> setOn,
                    Runnable reset) {
             // The mod's name at twice size, bold, then the tab's title, bold, as on
             // Inventory Plus's tabs. These tabs exist only with Inventory Max, so
             // the name is always "Inventory Plus Max".
-            out.add(TextLabel.builder().at(0, y)
-                    .text(Component.literal("Inventory Plus Max").withStyle(ChatFormatting.BOLD))
-                    .color(TextLabel.COLOR_DARK).scale(2f).build());
+            out.add(Flow.builder().at(0, y).gap(0, 0)
+                    .add(Flow.spacer())
+                    .add(TextLabel.builder()
+                            .text(Component.literal("Inventory Plus Max").withStyle(ChatFormatting.BOLD))
+                            .color(TextLabel.COLOR_DARK).scale(2f).build())
+                    .add(Flow.spacer())
+                    .build());
             y += 24;
             out.add(TextLabel.builder().at(0, y).text(Component.literal(title).withStyle(ChatFormatting.BOLD))
                     .color(TextLabel.COLOR_DARK).build());
             y += 14;
             out.add(TextLabel.builder().at(0, y).text(Component.literal(description)).color(TEXT).build());
             y += 16;
-            // The toggle at the left, Reset pinned to the right edge by the spacer.
+            out.add(Divider.horizontal().at(0, y).color(0xFF8B8B8B).build());
+            y += 6;
+            // Under the line: Reset furthest left, then the switch.
             out.add(Flow.builder().at(0, y).gap(10, 4)
-                    .add(Toggle.builder().size(40, 16).state(on, setOn)
-                            .label(() -> Component.literal(on.getAsBoolean() ? "On" : "Off")).build())
-                    .add(Flow.spacer())
                     .add(Button.builder().label(Component.literal("Reset to Defaults")).size(0, 16)
                             .onClick(() -> InventoryPlusApi.confirmInSettings("Reset " + title + " to defaults?",
                                     "Every setting and key on this tab goes back to how a fresh install has it.",
                                     reset))
                             .build())
+                    .add(Toggle.builder().size(40, 16).state(on, setOn)
+                            .label(() -> Component.literal(on.getAsBoolean() ? "On" : "Off")).build())
                     .build());
             y += 22;
             featureOn = on;
-            out.add(Divider.horizontal().at(0, y).color(0xFF8B8B8B).build());
-            y += 6;
             return this;
         }
 
