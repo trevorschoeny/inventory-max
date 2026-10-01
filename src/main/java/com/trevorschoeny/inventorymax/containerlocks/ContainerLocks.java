@@ -92,8 +92,16 @@ public final class ContainerLocks {
         // destination, collect, clicks, swaps, drops), replacing the three
         // lock mixins. On the client the open container is a SimpleContainer,
         // which handles() refuses, so this binds where the real block entity is.
-        SlotOperations.veto((ref, operation) ->
-                LOCK_DENIES.contains(operation) && isLocked(ref.container(), ref.containerSlot()));
+        SlotOperations.veto((ref, operation) -> {
+            boolean denied = LOCK_DENIES.contains(operation) && isLocked(ref.container(), ref.containerSlot());
+            // ponytail: [reach-probe] (Designer brief 2026-09-30): this store is
+            // judged on the server; Inventory Plus judges its own on the client.
+            // A line here with none from Inventory Plus is the two disagreeing.
+            if (denied) com.trevorschoeny.inventorymax.InventoryMax.LOGGER.info("[reach-probe] IM DENY thread={} op={} containerSlot={} container={}",
+                    Thread.currentThread().getName(), operation.id(), ref.containerSlot(),
+                    ref.container().getClass().getSimpleName());
+            return denied;
+        });
     }
 
     // ── Server-side recognition (real container types) ──────────────────────
