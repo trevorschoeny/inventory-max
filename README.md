@@ -17,9 +17,9 @@ HUD indicators show what's in the equipment slots. Every feature has its own tab
 ## Requirements
 
 - Inventory Plus 1.8.0 or newer
-- Keybindery 1.1.0 or newer
-- MenuKit 6.0.0 or newer and MenuKit: Containers 6.0.0 or newer, both below 7.0.0
-- Fabric API
+- [Keybindery](https://modrinth.com/mod/keybindery) 1.1.0 or newer
+- [MenuKit](https://modrinth.com/mod/menukit) 6.0.0 or newer and [MenuKit: Containers](https://modrinth.com/mod/menukit-containers) 6.0.0 or newer, both below 7.0.0
+- [Fabric API](https://modrinth.com/mod/fabric-api)
 
 ## Compatibility
 
